@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prépa Examen National de Licence — SIL</title>
+<!-- ===== shadcn/ui UI runtime : Tailwind + React + Babel ===== -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config={darkMode:'class',theme:{extend:{
+    colors:{
+      border:'hsl(var(--border))', input:'hsl(var(--input))', ring:'hsl(var(--ring))',
+      background:'hsl(var(--background))', foreground:'hsl(var(--foreground))',
+      primary:{DEFAULT:'hsl(var(--primary))', foreground:'hsl(var(--primary-foreground))'},
+      secondary:{DEFAULT:'hsl(var(--secondary))', foreground:'hsl(var(--secondary-foreground))'},
+      muted:{DEFAULT:'hsl(var(--muted))', foreground:'hsl(var(--muted-foreground))'},
+      accent:{DEFAULT:'hsl(var(--accent))', foreground:'hsl(var(--accent-foreground))'},
+      card:{DEFAULT:'hsl(var(--card))', foreground:'hsl(var(--card-foreground))'},
+      destructive:{DEFAULT:'hsl(var(--destructive))', foreground:'hsl(var(--destructive-foreground))'}
+    },
+    borderRadius:{lg:'var(--radius)', md:'calc(var(--radius) - 2px)', sm:'calc(var(--radius) - 4px)'}
+  }}};
+</script>
+<style id="shadcnTokens">
+  :root{
+    --background:222 47% 6%; --foreground:210 40% 98%;
+    --card:222 44% 9%; --card-foreground:210 40% 98%;
+    --primary:199 89% 48%; --primary-foreground:0 0% 100%;
+    --secondary:217 33% 16%; --secondary-foreground:210 40% 98%;
+    --muted:217 33% 16%; --muted-foreground:215 20% 65%;
+    --accent:217 33% 20%; --accent-foreground:210 40% 98%;
+    --border:217 33% 20%; --input:217 33% 22%; --ring:199 89% 48%;
+    --destructive:0 72% 51%; --destructive-foreground:210 40% 98%;
+    --radius:0.6rem;
+  }
+  .prose-inject h3{font-size:1.05rem;font-weight:600;margin:1rem 0 .4rem;color:hsl(var(--foreground))}
+  .prose-inject ul{margin:.4rem 0 .4rem 1.1rem;list-style:disc}
+  .prose-inject li{margin:.25rem 0}
+  .prose-inject a{color:hsl(var(--primary));text-decoration:underline}
+  .prose-inject .muted,.prose-inject p.muted{color:hsl(var(--muted-foreground));font-size:.85rem}
+  .prose-inject code{background:#0b1220;border:1px solid hsl(var(--border));border-radius:5px;padding:1px 6px;font-size:.85em}
+  .prose-inject table{border-collapse:collapse;width:100%;margin:.6rem 0;font-size:.85rem}
+  .prose-inject th,.prose-inject td{border:1px solid hsl(var(--border));padding:6px 8px;text-align:left}
+  .prose-inject th{background:hsl(var(--secondary))}
+  .prose-inject .card{background:transparent;border:0;padding:0;margin:0 0 .5rem}
+  .corr code{background:#0b1220;border:1px solid hsl(var(--border));border-radius:5px;padding:1px 6px;font-size:.85em}
+  .corr pre{background:#0b1220;border:1px solid hsl(var(--border));border-radius:8px;padding:12px;overflow-x:auto;
+    font-size:12.5px;line-height:1.45;white-space:pre-wrap;word-break:break-word;margin:.5rem 0}
+  .corr h5{color:#34d399;font-weight:600;margin:.6rem 0 .3rem}
+  .corr ol,.corr ul{margin:.4rem 0 .4rem 1.2rem} .corr ol{list-style:decimal} .corr ul{list-style:disc}
+  .corr li{margin:.25rem 0} .corr b{color:#e2e8f0}
+  .qhtml code{background:#0b1220;border:1px solid hsl(var(--border));border-radius:5px;padding:1px 6px;font-size:.85em}
+</style>
+<style id="hideLegacy">body>header,body>nav,body>main,body>footer{display:none!important}</style>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#1e293b; --panel2:#273449; --ink:#e2e8f0; --muted:#94a3b8;
+    --brand:#38bdf8; --brand2:#22d3ee; --good:#22c55e; --bad:#ef4444; --warn:#f59e0b;
+    --line:#334155; --chip:#0b3a4a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(160deg,#0b1220,#0f172a 40%,#111c33);color:var(--ink);line-height:1.55}
+  header{padding:26px 20px 16px;text-align:center;border-bottom:1px solid var(--line);
+    background:radial-gradient(1200px 300px at 50% -50%,rgba(56,189,248,.18),transparent)}
+  h1{margin:0 0 4px;font-size:clamp(20px,4vw,30px);letter-spacing:.3px}
+  .sub{color:var(--muted);font-size:14px}
+  .countdown{margin:14px auto 4px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:center}
+  .cd-box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 16px;min-width:96px}
+  .cd-num{font-size:26px;font-weight:800;color:var(--brand2)}
+  .cd-lab{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .datewrap{font-size:13px;color:var(--muted);margin-top:6px}
+  .datewrap input{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:4px 8px}
+  nav{position:sticky;top:0;z-index:20;display:flex;gap:6px;justify-content:center;flex-wrap:wrap;
+    padding:10px;background:rgba(15,23,42,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav button{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:999px;
+    padding:8px 16px;font-size:14px;cursor:pointer;transition:.15s}
+  nav button:hover{border-color:var(--brand)}
+  nav button.active{background:var(--brand);color:#03293b;border-color:var(--brand);font-weight:700}
+  main{max-width:920px;margin:0 auto;padding:22px 16px 80px}
+  section{display:none;animation:fade .25s ease}
+  section.show{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+  h2{font-size:22px;margin:6px 0 14px;color:var(--brand2)}
+  h3{font-size:17px;margin:20px 0 8px}
+  p{margin:8px 0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:12px 0}
+  .muted{color:var(--muted)}
+  ul{margin:8px 0 8px 2px;padding-left:20px}
+  li{margin:5px 0}
+  a{color:var(--brand2)}
+  /* Plan */
+  .day{display:grid;grid-template-columns:70px 1fr auto;gap:12px;align-items:center;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0}
+  .day .tag{font-weight:800;color:var(--brand2);font-size:15px}
+  .day .theme{font-size:14px}
+  .day .theme small{color:var(--muted)}
+  .day.today{border-color:var(--brand);box-shadow:0 0 0 2px rgba(56,189,248,.25)}
+  .day .go{background:var(--chip);border:1px solid var(--brand);color:var(--brand2);border-radius:8px;
+    padding:6px 12px;font-size:13px;cursor:pointer;white-space:nowrap}
+  .phase{margin:22px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:2px;color:var(--warn)}
+  /* Quiz */
+  .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:14px 0}
+  .theme-btn{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px;cursor:pointer;transition:.15s;color:var(--ink)}
+  .theme-btn:hover{border-color:var(--brand);transform:translateY(-2px)}
+  .theme-btn b{display:block;font-size:15px;margin-bottom:4px}
+  .theme-btn span{font-size:12px;color:var(--muted)}
+  .q{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .q .qhead{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+  .q .qnum{background:var(--chip);color:var(--brand2);border-radius:8px;padding:2px 10px;font-weight:700;font-size:13px;white-space:nowrap}
+  .qtype{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  .qtext{font-weight:600}
+  .qtext code,.expl code,.card code{background:#0b1220;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13px}
+  .opts{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+  .opt{display:flex;gap:10px;align-items:center;background:var(--panel2);border:1px solid var(--line);
+    border-radius:10px;padding:10px 12px;cursor:pointer;transition:.12s}
+  .opt:hover{border-color:var(--brand)}
+  .opt input{accent-color:var(--brand);width:17px;height:17px}
+  .opt.correct{border-color:var(--good);background:rgba(34,197,94,.12)}
+  .opt.wrong{border-color:var(--bad);background:rgba(239,68,68,.12)}
+  .short textarea{width:100%;min-height:70px;background:var(--panel2);border:1px solid var(--line);
+    color:var(--ink);border-radius:10px;padding:10px;font-family:inherit;font-size:14px;resize:vertical}
+  .reveal-btn{margin-top:8px;background:transparent;border:1px dashed var(--brand);color:var(--brand2);
+    border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px}
+  .expl{margin-top:10px;padding:10px 12px;border-left:3px solid var(--brand);background:#0b1220;
+    border-radius:6px;font-size:14px;display:none}
+  .expl.show{display:block}
+  .expl b{color:var(--good)}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0;position:sticky;bottom:0;
+    padding:12px 0;background:linear-gradient(transparent,var(--bg) 30%)}
+  .btn{background:var(--brand);color:#03293b;border:none;border-radius:10px;padding:12px 20px;
+    font-weight:700;cursor:pointer;font-size:15px}
+  .btn.sec{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+  .score{font-size:20px;font-weight:800;text-align:center;padding:16px;border-radius:12px;margin:14px 0;display:none}
+  .score.show{display:block}
+  .back{background:none;border:none;color:var(--brand2);cursor:pointer;font-size:14px;padding:4px 0;margin-bottom:8px}
+  .pill{display:inline-block;background:var(--chip);color:var(--brand2);border-radius:999px;padding:2px 10px;font-size:12px;margin-left:6px}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13px}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:left}
+  th{background:var(--panel2)}
+  /* Exercices */
+  .exo-filter{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+  .exo-filter button{background:var(--panel);color:var(--ink);border:1px solid var(--line);
+    border-radius:999px;padding:6px 14px;font-size:13px;cursor:pointer}
+  .exo-filter button.active{background:var(--brand);color:#03293b;border-color:var(--brand);font-weight:700}
+  .exo{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0}
+  .exo .cat{display:inline-block;background:var(--chip);color:var(--brand2);border-radius:999px;
+    padding:2px 10px;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+  .exo .diff{float:right;font-size:12px;color:var(--muted)}
+  .exo h4{margin:2px 0 8px;font-size:16px}
+  .enonce{font-size:14px}
+  .enonce ol,.enonce ul{margin:6px 0 6px 4px}
+  .corrige{margin-top:12px;border-top:1px dashed var(--line);padding-top:12px;display:none}
+  .corrige.show{display:block}
+  .corrige h5{margin:4px 0 6px;color:var(--good);font-size:14px}
+  pre{background:#0b1220;border:1px solid var(--line);border-radius:8px;padding:12px;overflow-x:auto;
+    font-size:13px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+  code{font-family:ui-monospace,Menlo,Consolas,monospace}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<header>
+  <h1>🎓 Prépa Examen National de Licence — SIL</h1>
+  <div class="sub">Système Informatique et Logiciel · Tronc Commun + Spécialité · Révision quotidienne</div>
+  <div class="countdown">
+    <div class="cd-box"><div class="cd-num" id="cdDays">–</div><div class="cd-lab">jours restants</div></div>
+    <div class="cd-box"><div class="cd-num" id="cdDay">–</div><div class="cd-lab">jour du plan</div></div>
+  </div>
+  <div class="datewrap">📅 Date de l'examen : <input type="date" id="examDate"></div>
+</header>
+
+<nav>
+  <button data-t="plan" class="active">📅 Plan J-24</button>
+  <button data-t="quiz">📝 Quiz</button>
+  <button data-t="exos">🧩 Exercices</button>
+  <button data-t="fiches">⚡ Fiches express</button>
+  <button data-t="method">🧠 Méthode</button>
+  <button data-t="liens">🔗 Ressources</button>
+</nav>
+
+<main>
+  <!-- PLAN -->
+  <section id="plan" class="show">
+    <h2>Calendrier de révision jour par jour</h2>
+    <p class="muted">Le plan tourne sur tous les thèmes de l'examen, alterne apprentissage / reprise / examens blancs,
+      et se termine par un allègement avant le jour J. Clique sur <b>Réviser</b> pour lancer le quiz du thème.</p>
+    <div id="planList"></div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quiz">
+    <div id="quizHome">
+      <h2>Choisis un thème à réviser</h2>
+      <p class="muted">Chaque série mélange QCM, Vrai/Faux et questions-réponses. Réponds, puis clique
+        « Corriger » pour ta note et les explications. Objectif : refaire chaque série jusqu'à ≥ 80 %.</p>
+      <div class="theme-grid" id="themeGrid"></div>
+    </div>
+    <div id="quizRun" style="display:none">
+      <button class="back" id="backBtn">← Retour aux thèmes</button>
+      <h2 id="quizTitle"></h2>
+      <div id="questions"></div>
+      <div class="score" id="scoreBox"></div>
+      <div class="actions">
+        <button class="btn" id="correctBtn">✓ Corriger</button>
+        <button class="btn sec" id="resetBtn">↻ Recommencer</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXERCICES -->
+  <section id="exos">
+    <h2>Exercices type-examen (à rédiger)</h2>
+    <p class="muted">40 sujets ouverts, comme le jour J, sur 3 niveaux (Facile / Moyen / Difficile) couvrant chaque aspect :
+      numération, logique, architecture, réseaux (dont VLSM), UML (séquence, états, classes), BD, normalisation,
+      SQL avancé, POO Java &amp; C++, PHP, HTML/CSS/Bootstrap, Excel, algorithmique. Rédige ta réponse sur brouillon
+      <b>avant</b> d'ouvrir le corrigé. Filtre par thème :</p>
+    <div class="exo-filter" id="exoFilter"></div>
+    <div id="exoList"></div>
+  </section>
+
+  <!-- FICHES -->
+  <section id="fiches">
+    <h2>Fiches express (à mémoriser)</h2>
+    <div class="card">
+      <h3>Numération & conversions</h3>
+      <ul>
+        <li>Binaire→décimal : somme des puissances de 2. Ex. <code>111001</code> = 32+16+8+1 = <b>57</b>.</li>
+        <li>Décimal→binaire : divisions successives par 2, on lit les restes de bas en haut.</li>
+        <li>Hexadécimal : 1 chiffre hexa = 4 bits. A=10, B=11, C=12, D=13, E=14, F=15.</li>
+        <li>Décimal→hexa : divisions par 16. Ex. <code>10217</code> = <b>27E9</b>₁₆.</li>
+        <li>Octal : 1 chiffre octal = 3 bits.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Réseaux — sous-réseautage (classe C)</h3>
+      <p>Réseau <code>192.168.28.0</code> → <b>classe C</b> (privée). Découper en 3 → emprunter <b>2 bits</b> (2²=4 ≥ 3).</p>
+      <ul>
+        <li>Masque : <code>255.255.255.192</code> (/26)</li>
+        <li>Sous-réseaux : 4 · Hôtes/sous-réseau : 2⁶−2 = <b>62</b></li>
+        <li>Pas d'incrément : 64 → blocs .0 / .64 / .128 / .192</li>
+        <li>4ᵉ sous-réseau : .192 → hôtes <b>.193 à .254</b>, broadcast .255</li>
+      </ul>
+      <p class="muted">Classes : A = 1–126 · B = 128–191 · C = 192–223. Masques par défaut /8, /16, /24.</p>
+    </div>
+    <div class="card">
+      <h3>Architecture des ordinateurs</h3>
+      <ul>
+        <li>Von Neumann = <b>SISD</b> (Single Instruction Single Data), programme et données en mémoire commune.</li>
+        <li>Mémoire cache : principe de <b>localité de référence</b> (règle 90-10).</li>
+        <li>Hiérarchie mémoire : Registres &gt; Cache &gt; RAM &gt; Disque.</li>
+        <li>Unités : 1 Ko=1024 o, 1 Mo=1024 Ko, 1 Go, 1 To, Po, Eo, Zo, <b>Yo</b> (la plus grande ici).</li>
+        <li>GUI = <b>Graphical User Interface</b>.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>UML</h3>
+      <ul>
+        <li>Cas d'utilisation = <b>acteurs</b> + fonctionnalités. Relations : include, extend, généralisation.</li>
+        <li>Diagramme de classes : classe = attributs + méthodes. Associations avec <b>multiplicités</b> (1, 0..1, 1..*, *).</li>
+        <li>Héritage = flèche triangle vide. Composition = losange plein. Agrégation = losange vide.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Bases de données — passage MCD → relationnel</h3>
+      <ul>
+        <li>Entité → table, identifiant → <b>clé primaire</b>.</li>
+        <li>Association <b>1,n</b> → la clé du côté « 1 » migre comme <b>clé étrangère</b> côté « n ».</li>
+        <li>Association <b>n,n</b> → nouvelle table portant les deux clés (clé composée) + attributs de l'association.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>SQL — squelette</h3>
+      <p><code>SELECT</code> cols <code>FROM</code> t1 <code>JOIN</code> t2 <code>ON</code> … <code>WHERE</code> … <code>GROUP BY</code> … <code>HAVING</code> … <code>ORDER BY</code> …</p>
+      <ul>
+        <li>Agrégats : <code>COUNT</code>, <code>SUM</code>, <code>AVG</code>, <code>MIN</code>, <code>MAX</code> (souvent avec GROUP BY).</li>
+        <li>Création : <code>CREATE TABLE</code> · Insertion : <code>INSERT INTO</code> · Contraintes : PRIMARY KEY, FOREIGN KEY.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>POO (Java / C++)</h3>
+      <ul>
+        <li>4 piliers : <b>Encapsulation, Héritage, Polymorphisme, Abstraction</b>.</li>
+        <li>Java : tableau d'entiers → <code>int[] t = new int[5];</code> · tri → <code>Arrays.sort()</code>.</li>
+        <li>Interface : méthodes abstraites (public par défaut), pas d'implémentation (avant Java 8).</li>
+        <li>C++ : classes avec <code>public/private/protected</code>, constructeurs, <code>::</code>, pointeurs.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>PHP · HTML/CSS/Bootstrap</h3>
+      <ul>
+        <li>PHP : balises <code>&lt;?php ?&gt;</code>, variables <code>$x</code>, superglobales <code>$_GET/$_POST/$_SESSION</code>, <code>echo</code>.</li>
+        <li>HTML : structure sémantique, formulaire <code>&lt;form method&gt;</code>, attribut <code>action</code>.</li>
+        <li>CSS sélecteurs : <code>#id</code>, <code>.classe</code>, balise. Boîte : margin/border/padding/content.</li>
+        <li>Bootstrap : grille <code>container &gt; row &gt; col-*</code> (12 colonnes), classes utilitaires responsives.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- METHODE -->
+  <section id="method">
+    <h2>La méthode pour réussir en 24 jours</h2>
+    <div class="card">
+      <h3>Programme type d'une journée (≈ 6 h)</h3>
+      <p class="muted">Deux blocs (matin/après-midi) avec pauses de 10 min toutes les 50 min (méthode Pomodoro).</p>
+      <table>
+        <tr><th>Créneau</th><th>Durée</th><th>Activité</th></tr>
+        <tr><td>Bloc 1 — Cours</td><td>45 min</td><td>Relire la fiche express + notes du thème du jour</td></tr>
+        <tr><td>Bloc 1 — Quiz</td><td>45 min</td><td>Onglet Quiz du thème, puis correction et carnet d'erreurs</td></tr>
+        <tr><td>Bloc 1 — Exercices faciles/moyens</td><td>60 min</td><td>2–3 exercices ouverts du thème (sans le corrigé)</td></tr>
+        <tr><td>— Pause déjeuner —</td><td>—</td><td></td></tr>
+        <tr><td>Bloc 2 — Exercice difficile</td><td>60 min</td><td>1 gros sujet type-examen, rédigé entièrement</td></tr>
+        <tr><td>Bloc 2 — Ancienne épreuve</td><td>75 min</td><td>Un dossier d'une vraie épreuve, en conditions</td></tr>
+        <tr><td>Bloc 2 — Reprise</td><td>30 min</td><td>Refaire les questions ratées + relire le carnet d'erreurs</td></tr>
+      </table>
+      <p class="muted">Total ≈ 6 h. Le thème du jour suit l'onglet « Plan J-24 ».</p>
+    </div>
+    <div class="card">
+      <h3>Comment atteindre la maîtrise totale</h3>
+      <ul>
+        <li>Ne passe au thème suivant qu'une fois le quiz réussi à <b>≥ 80 %</b> et l'exercice difficile rédigé sans le corrigé.</li>
+        <li>Fais <b>chaque exercice trois fois</b> sur le cycle : découverte → reprise J+3 → contrôle J+7.</li>
+        <li>Chaque niveau compte : commence par les exercices « Facile », finis par « Difficile » avant de valider un thème.</li>
+        <li>Un thème n'est « maîtrisé » que si tu peux refaire l'exercice difficile <b>de mémoire</b>, sans notes.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Les 5 principes</h3>
+      <ul>
+        <li><b>Espacement</b> : chaque thème est revu 2 fois (apprentissage puis reprise J+7 à J+10).</li>
+        <li><b>Test avant tout</b> : se tester fait plus mémoriser que relire.</li>
+        <li><b>Examens blancs</b> chronométrés (2 h) pour l'endurance et la gestion du temps.</li>
+        <li><b>Carnet d'erreurs</b> : chaque faute = 1 ligne « question / bonne réponse / pourquoi ».</li>
+        <li><b>Priorité au rentable</b> : subnetting, SQL, UML et conversions rapportent beaucoup de points sûrs.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Barème mental le jour J</h3>
+      <p>Commence par les QCM et les questions à points sûrs (conversions, réseaux, SQL). Garde les exercices
+        longs (diagramme de classes, code) pour un bloc dédié. Ne laisse aucune case QCM vide s'il n'y a pas de
+        point négatif.</p>
+    </div>
+  </section>
+
+  <!-- LIENS -->
+  <section id="liens">
+    <h2>Ressources & quiz en ligne</h2>
+    <div class="card">
+      <ul>
+        <li>QCM PHP 7 — <a href="https://www.qcmquiz.com/QUESTIONNAIRES/QCM-PHP7.php" target="_blank" rel="noopener">qcmquiz.com/QCM-PHP7</a></li>
+        <li>QCM (réponses) — <a href="https://www.qcmquiz.com/QCMreponses.php" target="_blank" rel="noopener">qcmquiz.com/QCMreponses</a></li>
+        <li>QCM Framework Spring — <a href="https://waytolearnx.com/2018/12/qcm-framework-spring-partie-1.html" target="_blank" rel="noopener">waytolearnx.com — Spring</a></li>
+        <li>Documentation Bootstrap 4.1 — <a href="https://getbootstrap.com/docs/4.1/getting-started/introduction/" target="_blank" rel="noopener">getbootstrap.com/docs/4.1</a></li>
+      </ul>
+      <p class="muted">Anciennes épreuves dans ce dossier : Tronc Commun 2018, 2019, 2022, 2023, 2024 · Spécialité 2019, 2022, 2023. Refais-les en conditions réelles (2 h, sans notes) comme examens blancs.</p>
+    </div>
+  </section>
+</main>
+
+<footer>Prépa SIL — outil de révision hors-ligne · refais chaque série jusqu'à la maîtrise 💪</footer>
+
+<script>
+/* ---------- Countdown & plan wiring ---------- */
+const PLAN_LEN = 24;
+function pad(n){return n<10?'0'+n:n}
+function defaultExamDate(){const d=new Date();d.setDate(d.getDate()+PLAN_LEN);return d}
+function getExamDate(){
+  let s=null; try{s=localStorage.getItem('sil_exam')}catch(e){}
+  return s?new Date(s+'T00:00:00'):defaultExamDate();
+}
+function fmt(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+const examInput=document.getElementById('examDate');
+examInput.value=fmt(getExamDate());
+examInput.addEventListener('change',()=>{try{localStorage.setItem('sil_exam',examInput.value)}catch(e){}; updateCountdown(); renderPlan();});
+function daysLeft(){
+  const now=new Date();now.setHours(0,0,0,0);
+  const ex=new Date(examInput.value+'T00:00:00');
+  return Math.round((ex-now)/86400000);
+}
+function updateCountdown(){
+  const dl=daysLeft();
+  document.getElementById('cdDays').textContent=dl>=0?dl:'0';
+  const planDay=Math.min(PLAN_LEN,Math.max(1,PLAN_LEN-dl+1));
+  document.getElementById('cdDay').textContent=(dl>=0&&dl<=PLAN_LEN)?planDay+'/'+PLAN_LEN:'—';
+}
+
+/* ---------- Revision plan ---------- */
+const PLAN=[
+  {ph:"Phase 1 · Diagnostic & apprentissage"},
+  {d:1,t:"Examen blanc diagnostic",k:"blanc1",s:"Repère tes points faibles"},
+  {d:2,t:"Numération & conversions",k:"num",s:"Binaire, hexa, octal, BCD"},
+  {d:3,t:"Architecture des ordinateurs",k:"archi",s:"Von Neumann, cache, mémoire"},
+  {d:4,t:"Réseaux & sous-réseautage",k:"res",s:"Classes IP, masques"},
+  {d:5,t:"Modélisation UML",k:"uml",s:"Cas d'utilisation, classes"},
+  {d:6,t:"Bases de données (MCD → relationnel)",k:"bd",s:"Entité-association, clés"},
+  {d:7,t:"SQL",k:"sql",s:"SELECT, jointures, agrégats"},
+  {d:8,t:"POO — Java / C++",k:"poo",s:"Classes, héritage, tableaux"},
+  {d:9,t:"PHP",k:"php",s:"Syntaxe, superglobales"},
+  {d:10,t:"HTML / CSS / Bootstrap",k:"web",s:"Balises, grille, sélecteurs"},
+  {d:11,t:"Tableur Excel",k:"excel",s:"Formules & fonctions"},
+  {ph:"Phase 2 · Reprise espacée"},
+  {d:12,t:"Examen blanc — Tronc Commun",k:"blanc2",s:"Chrono 2 h"},
+  {d:13,t:"Numération + Architecture (reprise)",k:"archi",s:"Referme les lacunes"},
+  {d:14,t:"Réseaux (reprise)",k:"res",s:"Subnetting sans notes"},
+  {d:15,t:"UML (reprise)",k:"uml",s:"Diagramme de classes complet"},
+  {d:16,t:"BD + SQL (reprise)",k:"sql",s:"Requêtes complexes"},
+  {d:17,t:"POO (reprise)",k:"poo",s:"Écrire une classe complète"},
+  {d:18,t:"PHP + Web (reprise)",k:"php",s:"Formulaire + traitement"},
+  {ph:"Phase 3 · Finition"},
+  {d:19,t:"Examen blanc — Spécialité",k:"blanc3",s:"Chrono 2 h"},
+  {d:20,t:"Points faibles ciblés",k:"blanc1",s:"Refais ce qui coince"},
+  {d:21,t:"Réseaux + SQL (les plus rentables)",k:"res",s:"Points sûrs"},
+  {d:22,t:"Examen blanc complet",k:"blanc2",s:"Simulation finale"},
+  {d:23,t:"Relecture fiches + carnet d'erreurs",k:"num",s:"Révision légère"},
+  {d:24,t:"Repos actif — relecture fiches",k:"web",s:"On n'apprend plus rien de neuf"}
+];
+function renderPlan(){
+  const dl=daysLeft();
+  const todayPlan=(dl>=0&&dl<=PLAN_LEN)?(PLAN_LEN-dl+1):-1;
+  const wrap=document.getElementById('planList');wrap.innerHTML='';
+  PLAN.forEach(item=>{
+    if(item.ph){const h=document.createElement('div');h.className='phase';h.textContent=item.ph;wrap.appendChild(h);return;}
+    const row=document.createElement('div');
+    row.className='day'+(item.d===todayPlan?' today':'');
+    row.innerHTML=`<div class="tag">J${item.d}${item.d===todayPlan?' •':''}</div>
+      <div class="theme">${item.t}<br><small>${item.s}</small></div>
+      <button class="go" data-k="${item.k}">Réviser</button>`;
+    wrap.appendChild(row);
+  });
+  wrap.querySelectorAll('.go').forEach(b=>b.addEventListener('click',()=>{switchTab('quiz');startQuiz(b.dataset.k);}));
+}
+
+/* ---------- Tabs ---------- */
+function switchTab(t){
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.t===t));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('show',s.id===t));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.t)));
+
+/* ---------- Question bank ----------
+   type: 'qcm' (une bonne réponse) | 'multi' (plusieurs) | 'vf' (vrai/faux) | 'short'
+*/
+const BANK={
+ num:{title:"Numération & conversions",qs:[
+  {type:'qcm',q:"Le nombre binaire <code>111001</code> vaut en décimal :",o:["56","57","58","60"],a:1,e:"32+16+8+0+0+1 = <b>57</b>."},
+  {type:'qcm',q:"Le nombre décimal <code>10217</code> correspond en base 16 à :",o:["27E9","27E8","28E9","28E8"],a:0,e:"10217 = 2×16³ + 7×16² + 14×16 + 9 → <b>27E9</b> (E=14)."},
+  {type:'qcm',q:"Le nombre hexadécimal <code>2F</code> vaut en décimal :",o:["31","46","47","62"],a:2,e:"2×16 + 15 = <b>47</b> (F=15)."},
+  {type:'qcm',q:"Convertir <code>45</code> (décimal) en binaire :",o:["101101","110101","101011","111001"],a:0,e:"45 = 32+8+4+1 = <b>101101</b>."},
+  {type:'qcm',q:"Un chiffre hexadécimal représente combien de bits ?",o:["2 bits","3 bits","4 bits","8 bits"],a:2,e:"1 hexa = <b>4 bits</b> ; 1 octal = 3 bits."},
+  {type:'vf',q:"Le format BCD est généralement utilisé pour stocker des données décimales.",a:true,e:"Vrai — le BCD (Binary Coded Decimal) code chaque chiffre décimal sur 4 bits."},
+  {type:'vf',q:"<code>1010</code> en binaire vaut 12 en décimal.",a:false,e:"Faux — 8+0+2+0 = <b>10</b>."},
+  {type:'qcm',q:"Le binaire <code>11111111</code> (1 octet) vaut :",o:["254","255","256","128"],a:1,e:"2⁸−1 = <b>255</b> (valeur max sur 8 bits)."},
+  {type:'qcm',q:"Convertir <code>C</code>₁₆ en binaire (4 bits) :",o:["1010","1100","1110","1011"],a:1,e:"C = 12 = <b>1100</b>."},
+  {type:'short',q:"Convertis 156 en hexadécimal (montre la démarche).",a:"156 / 16 = 9 reste 12 (C) ; 9 / 16 = 0 reste 9. Résultat : 9C₁₆.",e:"On lit les restes de bas en haut : <b>9C</b>."}
+ ]},
+ archi:{title:"Architecture des ordinateurs",qs:[
+  {type:'qcm',q:"L'architecture de Von Neumann est de type :",o:["SISD","SIMD","MIMD","MISD"],a:0,e:"Von Neumann = <b>SISD</b> : un flux d'instructions, un flux de données."},
+  {type:'qcm',q:"Le concept de mémoire cache repose sur :",o:["la localité de référence","la règle heuristique 90-10","le regroupement des références","Toutes les réponses"],a:3,e:"Les trois formulations décrivent le même principe → <b>toutes correctes</b>."},
+  {type:'qcm',q:"Que signifie GUI ?",o:["Graph Use Interface","Graphical Universal Interface","Graphical User Interface","Graphical Unique Interface"],a:2,e:"<b>Graphical User Interface</b> (interface graphique)."},
+  {type:'qcm',q:"Parmi ces unités, laquelle représente la plus grande capacité ?",o:["Zettaoctet","Yottaoctet","Exaoctet","Petaoctet"],a:1,e:"Ordre croissant : Po &lt; Eo &lt; Zo &lt; <b>Yo</b>."},
+  {type:'vf',q:"Un système multitâche peut exécuter simultanément plusieurs logiciels.",a:true,e:"Vrai — c'est la définition du multitâche."},
+  {type:'qcm',q:"Un scanner est un périphérique :",o:["d'entrée seulement","de sortie seulement","d'entrée/sortie","de stockage"],a:0,e:"Le scanner acquiert des données → périphérique <b>d'entrée</b>."},
+  {type:'qcm',q:"Quand l'UC exécute un programme du système d'exploitation, elle est en :",o:["mode interruption","mode système","mode demi","mode simplex"],a:1,e:"Exécution de code noyau → <b>mode système</b> (superviseur)."},
+  {type:'qcm',q:"Les portes logiques avec entrées et sorties forment un arrangement de :",o:["circuits combinatoires","circuits logiques","circuits de conception","circuits virtuels"],a:0,e:"Sortie = fonction directe des entrées → <b>circuits combinatoires</b>."},
+  {type:'vf',q:"La mémoire cache est plus lente que la RAM.",a:false,e:"Faux — la cache est <b>plus rapide</b> et plus proche du processeur."},
+  {type:'short',q:"Cite la hiérarchie mémoire du plus rapide au plus lent.",a:"Registres > Mémoire cache (L1,L2,L3) > Mémoire centrale (RAM) > Mémoire de masse (disque).",e:"Plus on descend, plus c'est lent, grand et bon marché."}
+ ]},
+ res:{title:"Réseaux & sous-réseautage",qs:[
+  {type:'qcm',q:"L'adresse <code>192.168.28.0</code> appartient à la classe :",o:["Classe A","Classe B","Classe C","Classe D"],a:2,e:"1er octet 192 (192–223) → <b>classe C</b>."},
+  {type:'qcm',q:"Pour découper un réseau de classe C en 3 sous-réseaux, combien de bits emprunter ?",o:["1 bit","2 bits","3 bits","4 bits"],a:1,e:"2² = 4 ≥ 3 → <b>2 bits</b> (1 bit ne donne que 2 sous-réseaux)."},
+  {type:'qcm',q:"Le masque obtenu en empruntant 2 bits sur un /24 est :",o:["255.255.255.128","255.255.255.192","255.255.255.224","255.255.255.240"],a:1,e:"/24 + 2 = /26 → <b>255.255.255.192</b>."},
+  {type:'qcm',q:"Nombre d'hôtes utilisables par sous-réseau avec un /26 :",o:["64","62","30","126"],a:1,e:"2⁶ − 2 = <b>62</b> (on retire adresse réseau et broadcast)."},
+  {type:'short',q:"Réseau 192.168.28.0 en 3 sous-réseaux : donne l'étendue des adresses hôtes du 4ᵉ sous-réseau.",a:"Blocs de 64 : .0, .64, .128, .192. 4e sous-réseau = 192.168.28.192 → hôtes .193 à .254, broadcast .255.",e:"Incrément 64 ; le 4ᵉ bloc commence à <b>.192</b>."},
+  {type:'vf',q:"Le masque par défaut d'une adresse de classe B est 255.255.0.0.",a:true,e:"Vrai — classe B = /16 = 255.255.0.0."},
+  {type:'qcm',q:"Dans le modèle OSI, combien de couches ?",o:["4","5","7","8"],a:2,e:"Le modèle OSI compte <b>7</b> couches."},
+  {type:'qcm',q:"Le protocole responsable de l'adressage logique (IP) agit à la couche :",o:["Liaison","Réseau","Transport","Application"],a:1,e:"IP = couche <b>réseau</b> (couche 3)."},
+  {type:'vf',q:"TCP est un protocole non fiable sans connexion.",a:false,e:"Faux — TCP est <b>fiable et orienté connexion</b> ; c'est UDP qui est sans connexion."},
+  {type:'short',q:"Combien de sous-réseaux et d'hôtes obtient-on avec un /28 sur une classe C ?",a:"/28 = 4 bits empruntés → 16 sous-réseaux, 2⁴−2 = 14 hôtes chacun.",e:"Blocs de 16 adresses ; 14 hôtes utilisables."}
+ ]},
+ uml:{title:"Modélisation UML",qs:[
+  {type:'qcm',q:"Dans un diagramme de cas d'utilisation, un acteur représente :",o:["une classe","un rôle externe qui interagit avec le système","une méthode","une base de données"],a:1,e:"L'acteur est un <b>rôle</b> (utilisateur ou système) externe."},
+  {type:'qcm',q:"La relation qui factorise un comportement obligatoire réutilisé est :",o:["extend","include","généralisation","dépendance"],a:1,e:"<b>include</b> = inclusion systématique d'un sous-cas ; extend = optionnel."},
+  {type:'qcm',q:"La multiplicité « 1..* » signifie :",o:["zéro ou un","exactement un","un ou plusieurs","zéro ou plusieurs"],a:2,e:"1..* = <b>au moins un</b>."},
+  {type:'vf',q:"Dans un diagramme de classes, une association n,n se traduit par une table intermédiaire au niveau relationnel.",a:true,e:"Vrai — l'association plusieurs-à-plusieurs devient une table de jointure."},
+  {type:'qcm',q:"Le losange plein dans un diagramme de classes représente :",o:["une agrégation","une composition","une généralisation","une dépendance"],a:1,e:"Losange plein = <b>composition</b> (le tout possède la partie)."},
+  {type:'vf',q:"Une classe abstraite peut être instanciée directement.",a:false,e:"Faux — une classe abstraite <b>ne peut pas</b> être instanciée."},
+  {type:'qcm',q:"Le diagramme qui montre l'enchaînement chronologique des messages entre objets est :",o:["diagramme de classes","diagramme de séquence","diagramme de cas d'utilisation","diagramme d'états"],a:1,e:"C'est le <b>diagramme de séquence</b>."},
+  {type:'short',q:"À partir de : « Un client passe une ou plusieurs commandes, chaque commande appartient à un seul client » — donne les multiplicités entre Client et Commande.",a:"Client 1 — 1..* Commande (un client a un ou plusieurs commandes ; une commande a exactement un client).",e:"Côté Client : 1 ; côté Commande : 1..*."},
+  {type:'short',q:"Cite 3 « règles de domaine » que l'on peut dégager d'un énoncé de gestion.",a:"Ex. : un client peut annuler tant que la session n'a pas commencé ; une inscription génère une ou plusieurs factures ; un formateur est affecté à une session.",e:"Une règle de domaine = contrainte métier exprimée par une phrase de l'énoncé."}
+ ]},
+ bd:{title:"Bases de données (MCD → relationnel)",qs:[
+  {type:'qcm',q:"Une entité du MCD devient au niveau relationnel :",o:["une colonne","une table","une clé étrangère","une vue"],a:1,e:"Chaque entité → une <b>table</b> ; son identifiant → clé primaire."},
+  {type:'qcm',q:"Pour une association 1,n, la clé étrangère se place :",o:["côté 1","côté n","dans une nouvelle table","nulle part"],a:1,e:"La clé du côté « 1 » migre <b>côté « n »</b> comme clé étrangère."},
+  {type:'qcm',q:"Une association n,n se traduit par :",o:["une clé étrangère côté n","une nouvelle table portant les deux clés","une fusion des deux tables","rien"],a:1,e:"Table de jointure avec une <b>clé composée</b> des deux identifiants."},
+  {type:'vf',q:"Une clé primaire peut contenir des valeurs nulles.",a:false,e:"Faux — une clé primaire est <b>unique et non nulle</b>."},
+  {type:'qcm',q:"La 1ʳᵉ forme normale (1FN) exige :",o:["pas de dépendance transitive","des attributs atomiques","une clé étrangère","un index"],a:1,e:"1FN = valeurs <b>atomiques</b> (indivisibles), pas de listes."},
+  {type:'vf',q:"Une clé étrangère référence une clé primaire d'une autre table.",a:true,e:"Vrai — elle garantit l'intégrité référentielle."},
+  {type:'short',q:"Traduis en relationnel : VOL(NumV, Jour…) et AVION(NumA…), un vol est effectué par un avion (association 1,n côté avion).",a:"AVION(NumA, Constructeur, Modele) ; VOL(NumV, Jour, HeureDepart, #NumA) où #NumA est clé étrangère vers AVION.",e:"La clé de AVION migre dans VOL car un avion effectue plusieurs vols."},
+  {type:'qcm',q:"Le modèle entité-association est un modèle :",o:["physique","conceptuel","logique","réseau"],a:1,e:"Le MCD (entité-association) est un modèle <b>conceptuel</b>."}
+ ]},
+ sql:{title:"SQL",qs:[
+  {type:'qcm',q:"Quelle clause filtre les lignes AVANT regroupement ?",o:["HAVING","WHERE","GROUP BY","ORDER BY"],a:1,e:"<b>WHERE</b> filtre les lignes ; HAVING filtre après GROUP BY."},
+  {type:'qcm',q:"Pour compter le nombre de passagers, on utilise :",o:["SUM()","COUNT()","AVG()","TOTAL()"],a:1,e:"<b>COUNT()</b> compte les lignes."},
+  {type:'multi',q:"Parmi ces commandes, lesquelles sont du LDD (DDL) ?",o:["CREATE","SELECT","ALTER","DROP"],a:[0,2,3],e:"CREATE, ALTER, DROP = LDD. SELECT = LMD (interrogation)."},
+  {type:'short',q:"Écris la requête : afficher la liste des passagers du vol numéro 'AF3487'.",a:"SELECT P.NomPA FROM PASSAGER P JOIN Areserve R ON P.NumPA=R.NumPA JOIN VOL V ON R.NumV=V.NumV WHERE V.NumV='AF3487';",e:"Jointure PASSAGER–réservation–VOL puis filtre sur le numéro de vol."},
+  {type:'short',q:"Écris la requête : calculer la moyenne du nombre de passagers par avion.",a:"SELECT AVG(nb) FROM (SELECT V.NumA, COUNT(R.NumPA) AS nb FROM VOL V JOIN Areserve R ON V.NumV=R.NumV GROUP BY V.NumV, V.NumA) t;",e:"On compte par vol/avion puis on fait la moyenne (sous-requête + AVG)."},
+  {type:'qcm',q:"Pour trier les résultats par ordre décroissant de salaire :",o:["ORDER BY salaire","ORDER BY salaire ASC","ORDER BY salaire DESC","SORT BY salaire"],a:2,e:"<b>ORDER BY salaire DESC</b>."},
+  {type:'vf',q:"La clause GROUP BY est obligatoire dès qu'on utilise une fonction d'agrégation.",a:false,e:"Faux — <code>SELECT COUNT(*) FROM T;</code> fonctionne sans GROUP BY."},
+  {type:'qcm',q:"Quelle commande ajoute une ligne dans une table ?",o:["UPDATE","INSERT INTO","ADD ROW","APPEND"],a:1,e:"<b>INSERT INTO</b> … VALUES …"},
+  {type:'short',q:"Écris le CREATE TABLE de VOL(NumV clé, Jour, HeureDepart, NumA clé étrangère→AVION).",a:"CREATE TABLE VOL(NumV VARCHAR(10) PRIMARY KEY, Jour DATE, HeureDepart TIME, NumA INT, FOREIGN KEY(NumA) REFERENCES AVION(NumA));",e:"PRIMARY KEY sur NumV, FOREIGN KEY sur NumA."}
+ ]},
+ poo:{title:"POO — Java / C++",qs:[
+  {type:'qcm',q:"Quelle instruction crée un tableau d'entiers de 5 cases en Java ?",o:["int t = new int[5];","int[] t = new int[5];","Array t = new int[5];","int[] t = new Array(5);"],a:1,e:"Syntaxe correcte : <code>int[] t = new int[5];</code>."},
+  {type:'qcm',q:"Comment trier un tableau en Java ?",o:["System.sort()","Collection.sort()","Arrays.sort()","Array.sort()"],a:2,e:"<b>Arrays.sort()</b> (classe java.util.Arrays)."},
+  {type:'multi',q:"Concernant les méthodes d'une interface Java (avant Java 8), lesquelles sont vraies ?",o:["Une interface ne contient que des méthodes abstraites","On peut définir (implémenter) une méthode dans une interface","Les modificateurs private/protected s'appliquent aux méthodes d'interface","Aucune n'est vraie"],a:[0],e:"Avant Java 8 : <b>uniquement des méthodes abstraites</b>, implicitement public."},
+  {type:'qcm',q:"Qu'affiche <code>int[] tab = new int[9]; System.out.print(tab);</code> ?",o:["00000","0","valeur de tab[0]","une adresse/valeur de hachage"],a:3,e:"Afficher le tableau imprime sa référence (type + hashcode), pas son contenu."},
+  {type:'vf',q:"L'encapsulation consiste à masquer les attributs et y accéder via des méthodes (getters/setters).",a:true,e:"Vrai — attributs private + accesseurs publics."},
+  {type:'qcm',q:"En C++, l'opérateur de résolution de portée est :",o:[".",":","::","->"],a:2,e:"L'opérateur <b>::</b> (scope resolution)."},
+  {type:'vf',q:"En C++, un constructeur porte le même nom que la classe et n'a pas de type de retour.",a:true,e:"Vrai — même nom que la classe, aucun type de retour (pas même void)."},
+  {type:'qcm',q:"Le mécanisme permettant à une sous-classe d'hériter d'une super-classe s'appelle :",o:["encapsulation","héritage","polymorphisme","surcharge"],a:1,e:"C'est l'<b>héritage</b>."},
+  {type:'short',q:"Écris en Java la classe Article(codeArticle, marque, prixHorsTaxe) avec une méthode prixTransport() = 5% du prix HT.",a:"class Article{ String codeArticle, marque; double prixHorsTaxe; Article(String c,String m,double p){codeArticle=c;marque=m;prixHorsTaxe=p;} double prixTransport(){return 0.05*prixHorsTaxe;} }",e:"Attributs + constructeur + méthode retournant 5% du prix HT."}
+ ]},
+ php:{title:"PHP",qs:[
+  {type:'qcm',q:"Quelles balises délimitent du code PHP ?",o:["&lt;php&gt; &lt;/php&gt;","&lt;? ?&gt; ou &lt;?php ?&gt;","{ }","&lt;% %&gt;"],a:1,e:"<code>&lt;?php ... ?&gt;</code> (ou balise courte &lt;? ?&gt;)."},
+  {type:'qcm',q:"Comment déclare-t-on une variable en PHP ?",o:["var x","$x","@x","int x"],a:1,e:"Toute variable commence par <b>$</b> : <code>$x</code>."},
+  {type:'qcm',q:"Quelle superglobale récupère les données d'un formulaire envoyé en méthode POST ?",o:["$_GET","$_POST","$_REQUESTPOST","$_FORM"],a:1,e:"<b>$_POST</b> pour la méthode POST."},
+  {type:'vf',q:"En PHP, <code>echo</code> sert à afficher du contenu.",a:true,e:"Vrai — <code>echo</code> (ou print) affiche."},
+  {type:'qcm',q:"Pour démarrer une session en PHP :",o:["start_session()","session_start()","begin_session()","new Session()"],a:1,e:"<b>session_start()</b> en tout début de script."},
+  {type:'qcm',q:"L'opérateur de concaténation de chaînes en PHP est :",o:["+","&amp;",".","||"],a:2,e:"Le <b>point</b> : <code>$a . $b</code>."},
+  {type:'vf',q:"En PHP, <code>==</code> et <code>===</code> sont strictement équivalents.",a:false,e:"Faux — <code>===</code> compare valeur <b>et</b> type ; <code>==</code> compare la valeur après conversion."},
+  {type:'short',q:"Écris le code PHP qui récupère un champ 'nom' d'un formulaire POST et l'affiche.",a:"<?php $nom = $_POST['nom']; echo 'Bonjour '.$nom; ?>",e:"Lecture via $_POST puis echo."}
+ ]},
+ web:{title:"HTML / CSS / Bootstrap",qs:[
+  {type:'qcm',q:"Quelle balise crée un lien hypertexte ?",o:["&lt;link&gt;","&lt;a&gt;","&lt;href&gt;","&lt;url&gt;"],a:1,e:"<code>&lt;a href='...'&gt;</code>."},
+  {type:'qcm',q:"En CSS, on cible un élément par son identifiant avec :",o:[".nom","#nom","*nom","@nom"],a:1,e:"<b>#</b> pour un id, <b>.</b> pour une classe."},
+  {type:'qcm',q:"Le système de grille Bootstrap compte combien de colonnes ?",o:["6","10","12","16"],a:2,e:"Grille de <b>12</b> colonnes."},
+  {type:'vf',q:"Dans Bootstrap, la hiérarchie de la grille est container &gt; row &gt; col.",a:true,e:"Vrai — <code>.container &gt; .row &gt; .col-*</code>."},
+  {type:'qcm',q:"Quel attribut d'un formulaire indique l'URL de traitement ?",o:["method","action","target","src"],a:1,e:"L'attribut <b>action</b> ; <b>method</b> indique GET/POST."},
+  {type:'qcm',q:"L'ordre du modèle de boîte CSS (de l'intérieur vers l'extérieur) est :",o:["margin, border, padding, content","content, padding, border, margin","padding, content, margin, border","border, margin, content, padding"],a:1,e:"content → padding → border → <b>margin</b>."},
+  {type:'vf',q:"La classe Bootstrap <code>col-md-6</code> occupe la moitié de la largeur sur écran moyen.",a:true,e:"Vrai — 6/12 = moitié à partir du point de rupture md."},
+  {type:'short',q:"Écris la structure Bootstrap de deux colonnes égales.",a:"<div class='container'><div class='row'><div class='col-6'>A</div><div class='col-6'>B</div></div></div>",e:"container > row > deux col-6 (6+6=12)."}
+ ]},
+ excel:{title:"Tableur Excel",qs:[
+  {type:'qcm',q:"Toute formule Excel commence par :",o:[":","=","#","@"],a:1,e:"Le signe <b>=</b>."},
+  {type:'qcm',q:"Quelle fonction additionne une plage de cellules ?",o:["ADD()","SOMME()","TOTAL()","PLUS()"],a:1,e:"<b>SOMME()</b> (SUM en anglais)."},
+  {type:'qcm',q:"Une référence absolue à la cellule B2 s'écrit :",o:["B2","$B2","B$2","$B$2"],a:3,e:"<b>$B$2</b> fige colonne et ligne."},
+  {type:'qcm',q:"Quelle fonction retourne une valeur selon une condition ?",o:["SI()","COND()","CHOIX()","TEST()"],a:0,e:"<b>SI(test; valeur_vrai; valeur_faux)</b> (IF)."},
+  {type:'vf',q:"RECHERCHEV cherche une valeur dans la première colonne d'une table.",a:true,e:"Vrai — RECHERCHEV (VLOOKUP) balaie la 1ʳᵉ colonne."},
+  {type:'short',q:"Écris une formule qui affiche 'Homme' si C2='M', sinon 'Femme'.",a:"=SI(C2=\"M\";\"Homme\";\"Femme\")",e:"Fonction SI avec test d'égalité."},
+  {type:'short',q:"D'après la grille de paie : retenue = 10000 pour les hommes, sinon 3% ou 5% du salaire. Écris la formule pour un homme.",a:"=SI(Sexe=\"M\";10000; SI(NbEnfants>3; 0.03*SalaireBase; 0.05*SalaireBase))",e:"SI imbriqués : homme → 10000, femme selon nombre d'enfants."}
+ ]},
+ blanc1:{title:"Examen blanc diagnostic (mixte)",qs:[
+  {type:'qcm',q:"<code>111001</code>₂ en décimal :",o:["56","57","58","60"],a:1,e:"= 57."},
+  {type:'qcm',q:"192.168.28.0 est de classe :",o:["A","B","C","D"],a:2,e:"Classe C."},
+  {type:'qcm',q:"Von Neumann est de type :",o:["SISD","SIMD","MIMD","MISD"],a:0,e:"SISD."},
+  {type:'qcm',q:"Tri d'un tableau en Java :",o:["System.sort()","Arrays.sort()","Array.sort()","Collection.sort()"],a:1,e:"Arrays.sort()."},
+  {type:'qcm',q:"Superglobale PHP pour un formulaire POST :",o:["$_GET","$_POST","$_FORM","$_DATA"],a:1,e:"$_POST."},
+  {type:'qcm',q:"Grille Bootstrap :",o:["10 colonnes","12 colonnes","16 colonnes","6 colonnes"],a:1,e:"12 colonnes."},
+  {type:'vf',q:"Une clé primaire peut être nulle.",a:false,e:"Faux."},
+  {type:'vf',q:"L'association n,n devient une table de jointure.",a:true,e:"Vrai."},
+  {type:'qcm',q:"WHERE filtre les lignes :",o:["après GROUP BY","avant regroupement","à la place de HAVING","jamais"],a:1,e:"Avant regroupement."},
+  {type:'short',q:"Donne le masque d'un /26.",a:"255.255.255.192",e:"/26 = 255.255.255.192."}
+ ]},
+ blanc2:{title:"Examen blanc — Tronc Commun (mixte)",qs:[
+  {type:'qcm',q:"<code>2F</code>₁₆ en décimal :",o:["31","46","47","62"],a:2,e:"47."},
+  {type:'qcm',q:"1 chiffre hexa = combien de bits ?",o:["2","3","4","8"],a:2,e:"4 bits."},
+  {type:'qcm',q:"Cache : principe de :",o:["localité de référence","parallélisme","virtualisation","pipeline"],a:0,e:"Localité de référence."},
+  {type:'qcm',q:"Découper une classe C en 3 sous-réseaux → emprunter :",o:["1 bit","2 bits","3 bits","4 bits"],a:1,e:"2 bits."},
+  {type:'qcm',q:"Hôtes utilisables par /26 :",o:["64","62","30","126"],a:1,e:"62."},
+  {type:'qcm',q:"OSI compte :",o:["4 couches","5 couches","7 couches","8 couches"],a:2,e:"7 couches."},
+  {type:'vf',q:"Un scanner est un périphérique d'entrée.",a:true,e:"Vrai."},
+  {type:'qcm',q:"Formule Excel commence par :",o:[":","=","#","@"],a:1,e:"=."},
+  {type:'short',q:"Étendue hôtes du 4ᵉ sous-réseau de 192.168.28.0 (/26).",a:"192.168.28.193 à 192.168.28.254 (broadcast .255).",e:"Bloc .192."},
+  {type:'short',q:"Convertis 45 en binaire.",a:"101101",e:"32+8+4+1."}
+ ]},
+ blanc3:{title:"Examen blanc — Spécialité (mixte)",qs:[
+  {type:'qcm',q:"L'acteur en UML est :",o:["une classe","un rôle externe","une méthode","une table"],a:1,e:"Un rôle externe."},
+  {type:'qcm',q:"Association n,n au relationnel :",o:["clé étrangère côté n","nouvelle table à clé composée","fusion","rien"],a:1,e:"Nouvelle table."},
+  {type:'qcm',q:"Compter des lignes en SQL :",o:["SUM()","COUNT()","AVG()","NB()"],a:1,e:"COUNT()."},
+  {type:'qcm',q:"Créer un tableau d'entiers de 5 cases (Java) :",o:["int t=new int[5];","int[] t=new int[5];","Array t=new int[5];","int[] t=new Array(5);"],a:1,e:"int[] t = new int[5];"},
+  {type:'qcm',q:"Opérateur de portée en C++ :",o:[".",":","::","->"],a:2,e:"::"},
+  {type:'vf',q:"En PHP, === compare valeur et type.",a:true,e:"Vrai."},
+  {type:'qcm',q:"Cible CSS par classe :",o:["#nom",".nom","*nom","@nom"],a:1,e:".nom"},
+  {type:'multi',q:"Commandes LDD (DDL) :",o:["CREATE","SELECT","DROP","ALTER"],a:[0,2,3],e:"CREATE, DROP, ALTER."},
+  {type:'short',q:"CREATE TABLE VOL avec NumV clé primaire et NumA clé étrangère.",a:"CREATE TABLE VOL(NumV VARCHAR(10) PRIMARY KEY, NumA INT, FOREIGN KEY(NumA) REFERENCES AVION(NumA));",e:"PK + FK."},
+  {type:'short',q:"Cite les 4 piliers de la POO.",a:"Encapsulation, Héritage, Polymorphisme, Abstraction.",e:"Les 4 fondamentaux."}
+ ]}
+};
+
+/* ---------- Quiz engine ---------- */
+function renderThemeGrid(){
+  const g=document.getElementById('themeGrid');g.innerHTML='';
+  Object.keys(BANK).forEach(k=>{
+    const b=document.createElement('button');b.className='theme-btn';
+    b.innerHTML=`<b>${BANK[k].title}</b><span>${BANK[k].qs.length} questions</span>`;
+    b.addEventListener('click',()=>startQuiz(k));g.appendChild(b);
+  });
+}
+let current=null;
+function startQuiz(k){
+  current=k;const data=BANK[k];
+  document.getElementById('quizHome').style.display='none';
+  document.getElementById('quizRun').style.display='block';
+  document.getElementById('quizTitle').innerHTML=data.title+`<span class="pill">${data.qs.length} questions</span>`;
+  const box=document.getElementById('questions');box.innerHTML='';
+  data.qs.forEach((q,i)=>box.appendChild(buildQ(q,i)));
+  const sb=document.getElementById('scoreBox');sb.className='score';sb.textContent='';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function typeLabel(t){return {qcm:'QCM · 1 réponse',multi:'QCM · plusieurs réponses',vf:'Vrai / Faux',short:'Question-réponse'}[t]}
+function buildQ(q,i){
+  const div=document.createElement('div');div.className='q';div.dataset.i=i;
+  let html=`<div class="qhead"><span class="qnum">Q${i+1}</span><div><div class="qtype">${typeLabel(q.type)}</div><div class="qtext">${q.q}</div></div></div>`;
+  if(q.type==='qcm'||q.type==='multi'){
+    const inp=q.type==='qcm'?'radio':'checkbox';
+    html+='<div class="opts">'+q.o.map((o,j)=>
+      `<label class="opt"><input type="${inp}" name="q${i}" value="${j}"><span>${o}</span></label>`).join('')+'</div>';
+  }else if(q.type==='vf'){
+    html+=`<div class="opts">
+      <label class="opt"><input type="radio" name="q${i}" value="true"><span>Vrai</span></label>
+      <label class="opt"><input type="radio" name="q${i}" value="false"><span>Faux</span></label></div>`;
+  }else{
+    html+=`<div class="short"><textarea placeholder="Rédige ta réponse..."></textarea>
+      <button class="reveal-btn" type="button">Voir la réponse modèle</button></div>`;
+  }
+  html+=`<div class="expl"></div>`;
+  div.innerHTML=html;
+  if(q.type==='short'){
+    div.querySelector('.reveal-btn').addEventListener('click',()=>{
+      const ex=div.querySelector('.expl');
+      ex.innerHTML=`<b>Réponse modèle :</b> ${escapeHtml(q.a)}<br><span class="muted">${q.e}</span>`;
+      ex.classList.add('show');
+    });
+  }
+  return div;
+}
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+document.getElementById('correctBtn').addEventListener('click',()=>{
+  const data=BANK[current];let score=0,gradable=0;
+  data.qs.forEach((q,i)=>{
+    const div=document.querySelector(`.q[data-i="${i}"]`);
+    const ex=div.querySelector('.expl');
+    if(q.type==='short'){
+      ex.innerHTML=`<b>Réponse modèle :</b> ${escapeHtml(q.a)}<br><span class="muted">${q.e}</span>`;
+      ex.classList.add('show');return;
+    }
+    gradable++;
+    div.querySelectorAll('.opt').forEach(o=>o.classList.remove('correct','wrong'));
+    const opts=[...div.querySelectorAll('.opt')];
+    let ok=false;
+    if(q.type==='qcm'){
+      const sel=div.querySelector('input:checked');
+      opts[q.a].classList.add('correct');
+      if(sel){const v=+sel.value; if(v===q.a)ok=true; else opts[v].classList.add('wrong');}
+    }else if(q.type==='vf'){
+      const sel=div.querySelector('input:checked');
+      const correctIdx=q.a?0:1; opts[correctIdx].classList.add('correct');
+      if(sel){const v=(sel.value==='true'); if(v===q.a)ok=true; else opts[q.a?1:0].classList.add('wrong');}
+    }else if(q.type==='multi'){
+      const sel=[...div.querySelectorAll('input:checked')].map(x=>+x.value).sort();
+      const ans=[...q.a].sort();
+      q.a.forEach(j=>opts[j].classList.add('correct'));
+      sel.forEach(j=>{if(!q.a.includes(j))opts[j].classList.add('wrong')});
+      ok=(sel.length===ans.length&&sel.every((v,idx)=>v===ans[idx]));
+    }
+    if(ok)score++;
+    ex.innerHTML=(ok?'<b>✓ Correct.</b> ':'<b style="color:var(--bad)">✗ Revois. </b>')+q.e;
+    ex.classList.add('show');
+  });
+  const pct=Math.round(score/gradable*100);
+  const sb=document.getElementById('scoreBox');
+  sb.className='score show';
+  sb.style.background=pct>=80?'rgba(34,197,94,.15)':pct>=50?'rgba(245,158,11,.15)':'rgba(239,68,68,.15)';
+  sb.style.color=pct>=80?'var(--good)':pct>=50?'var(--warn)':'var(--bad)';
+  sb.innerHTML=`Score QCM/VF : ${score}/${gradable} — ${pct}%<br><span class="muted" style="font-size:13px">${pct>=80?'Maîtrisé 🎉 Passe au thème suivant.':'Refais cette série jusqu\'à ≥ 80 %. Les questions-réponses sont à corriger toi-même.'}</span>`;
+  sb.scrollIntoView({behavior:'smooth',block:'center'});
+});
+document.getElementById('resetBtn').addEventListener('click',()=>startQuiz(current));
+document.getElementById('backBtn').addEventListener('click',()=>{
+  document.getElementById('quizRun').style.display='none';
+  document.getElementById('quizHome').style.display='block';
+});
+
+/* ---------- Exercices ouverts (type examen) ---------- */
+const EXOS=[
+ {cat:"Réseaux",diff:"⏱ 15 min",titre:"Sous-réseautage d'un réseau de classe C",
+  enonce:`Un centre informatique dispose du réseau IP <code>192.168.28.0</code>. On souhaite le subdiviser en <b>3 sous-réseaux</b>.
+  <ol>
+   <li>Donne la classe de cette adresse IP.</li>
+   <li>Indique le nombre de bits à emprunter.</li>
+   <li>Indique le nombre total de sous-réseaux exploitables.</li>
+   <li>Indique le nombre d'hôtes par sous-réseau.</li>
+   <li>Donne le masque de sous-réseau.</li>
+   <li>Donne l'étendue des adresses hôtes du 4ᵉ sous-réseau utilisable.</li>
+  </ol>`,
+  corrige:`<ol>
+   <li><b>Classe C</b> (1ᵉʳ octet = 192, compris entre 192 et 223 ; masque par défaut /24).</li>
+   <li>Il faut 3 sous-réseaux. 2¹=2 &lt; 3, 2²=4 ≥ 3 → on emprunte <b>2 bits</b> sur la partie hôte.</li>
+   <li>Nombre de sous-réseaux = 2² = <b>4</b> (tous exploitables avec le sous-réseautage moderne).</li>
+   <li>Bits hôtes restants = 8 − 2 = 6 → hôtes par sous-réseau = 2⁶ − 2 = <b>62</b> (on retire l'adresse réseau et le broadcast).</li>
+   <li>Masque = /24 + 2 = <b>/26</b> = <b>255.255.255.192</b>.</li>
+   <li>Incrément = 256 − 192 = 64. Blocs : .0 | .64 | .128 | <b>.192</b>.
+     4ᵉ sous-réseau = 192.168.28.192 → adresses hôtes de <b>192.168.28.193 à 192.168.28.254</b>, broadcast = 192.168.28.255.</li>
+  </ol>`},
+
+ {cat:"UML",diff:"⏱ 30 min",titre:"Modélisation d'un centre de formation",
+  enonce:`Un centre de formation organise des sessions pour des clients. Un client peut consulter (sans se connecter) le catalogue et discuter avec un téléconseiller. Il peut s'inscrire pour être informé, s'inscrire à une session, et annuler tant que la session n'a pas commencé. Une inscription génère une ou plusieurs factures éditées par un téléconseiller et payées par le client. Le responsable de formation réalise toutes les actions d'un téléconseiller et édite en plus des statistiques de relance.
+  <ol>
+   <li>Identifie les acteurs du système.</li>
+   <li>Cite 5 cas d'utilisation.</li>
+   <li>Dégage 5 règles de gestion (de domaine) du texte.</li>
+   <li>Propose les classes principales avec leurs associations.</li>
+  </ol>`,
+  corrige:`<h5>1. Acteurs</h5>
+  <ul><li><b>Client</b> (acteur principal)</li><li><b>Téléconseiller</b></li>
+  <li><b>Responsable de formation</b> — hérite du téléconseiller (généralisation d'acteur)</li></ul>
+  <h5>2. Cas d'utilisation</h5>
+  <ul><li>Consulter le catalogue de formations</li><li>Discuter avec un téléconseiller</li>
+  <li>S'inscrire à une session</li><li>Annuler une inscription</li><li>Éditer / payer une facture</li>
+  <li>(Responsable) Éditer des statistiques de relance</li></ul>
+  <h5>3. Règles de gestion</h5>
+  <ol><li>Un client peut consulter le catalogue sans se connecter.</li>
+  <li>Un client ne peut annuler que tant que la session n'a pas commencé.</li>
+  <li>Une inscription donne lieu à une ou plusieurs factures.</li>
+  <li>Une facture est éditée par un téléconseiller et payée par le client.</li>
+  <li>Le responsable de formation réalise toutes les actions d'un téléconseiller.</li></ol>
+  <h5>4. Classes principales</h5>
+  <pre>Client (id, titre, nom, prénoms, email, téléphone, dateNaiss, sexe)
+Adresse (ville, boitePostale)            Client *--1 Adresse
+Session (dateDémarrage, prix, langue)    Session 1--* Inscription
+Inscription (dateCréation, dateAnnul, remise, présence)
+Facture (montant, datePaiement)          Inscription 1--* Facture
+Cours (intitulé, domaine, dateCréation)  Cours 1--* Session
+Formateur (nom, prénom, niveau)          Formateur 1--* Session</pre>
+  <p class="muted">Multiplicités clés : un Client passe 0..* Inscriptions ; une Inscription concerne 1 Session et génère 1..* Factures.</p>`},
+
+ {cat:"BD / SQL",diff:"⏱ 30 min",titre:"Du modèle entité-association au SQL (gestion de vols)",
+  enonce:`On dispose du modèle : <b>AVION</b>(NumA, Constructeur, Modele) — <b>COMPAGNIE</b>(NomC) — <b>VOL</b>(NumV, Jour, HeureDepart, HeureArrivee, PlacesLibres) — <b>PERSONNEL</b>(NomPE, Fonction) — <b>PASSAGER</b>(NomPA) — <b>AEROPORT</b>(NomA) — <b>VILLE</b>(NomV). Un avion appartient à une compagnie ; un avion effectue plusieurs vols ; un vol part d'un aéroport et arrive à un autre ; un passager réserve des vols (date de réservation).
+  <ol>
+   <li>Traduis ce modèle en modèle relationnel (tables + clés).</li>
+   <li>Écris le SQL pour : (a) créer la table VOL ; (b) la liste des passagers du vol 'AF3487' ; (c) la moyenne du nombre de passagers par avion ; (d) les compagnies ayant effectué au moins un vol vers Libreville.</li>
+  </ol>`,
+  corrige:`<h5>1. Modèle relationnel</h5>
+  <pre>COMPAGNIE(NomC)
+AVION(NumA, Constructeur, Modele, #NomC)
+AEROPORT(NomA, #NomV)
+VILLE(NomV)
+VOL(NumV, Jour, HeureDepart, HeureArrivee, PlacesLibres,
+    #NumA, #AeroDepart, #AeroArrivee)
+PASSAGER(NomPA)
+RESERVER(#NumV, #NomPA, DateReservation)   -- association n,n
+TRAVAILLER(#NomPE, #NomC)                   -- personnel/compagnie</pre>
+  <p class="muted">Une association 1,n → la clé du côté 1 migre côté n. Une association n,n (réserver) → table dédiée à clé composée.</p>
+  <h5>2. Requêtes SQL</h5>
+  <pre>-- a) créer la table VOL
+CREATE TABLE VOL(
+  NumV        VARCHAR(10) PRIMARY KEY,
+  Jour        DATE,
+  HeureDepart TIME,
+  HeureArrivee TIME,
+  PlacesLibres INT,
+  NumA        INT,
+  FOREIGN KEY (NumA) REFERENCES AVION(NumA)
+);
+
+-- b) passagers du vol AF3487
+SELECT P.NomPA
+FROM PASSAGER P
+JOIN RESERVER R ON P.NomPA = R.NomPA
+WHERE R.NumV = 'AF3487';
+
+-- c) moyenne du nombre de passagers par avion
+SELECT AVG(nb) AS moyenne
+FROM ( SELECT V.NumA, COUNT(R.NomPA) AS nb
+       FROM VOL V JOIN RESERVER R ON V.NumV = R.NumV
+       GROUP BY V.NumA ) t;
+
+-- d) compagnies ayant un vol vers Libreville
+SELECT DISTINCT C.NomC
+FROM COMPAGNIE C
+JOIN AVION A   ON A.NomC = C.NomC
+JOIN VOL V     ON V.NumA = A.NumA
+JOIN AEROPORT AE ON V.AeroArrivee = AE.NomA
+JOIN VILLE VI  ON AE.NomV = VI.NomV
+WHERE VI.NomV = 'Libreville';</pre>`},
+
+ {cat:"POO Java",diff:"⏱ 25 min",titre:"Classe Article (import et taxes)",
+  enonce:`Un magasin importe ses articles. Un article est caractérisé par son code (<code>codeArticle</code>), sa marque (<code>marque</code>) et son prix hors taxe (<code>prixHorsTaxe</code>). Le prix de transport représente <b>5 %</b> du prix HT et la taxe douanière <b>18 %</b>. Écris une classe Java qui définit l'article avec : le constructeur adéquat, la méthode <code>prixTransport()</code>, la méthode <code>taxeDouaniere()</code>, et la méthode <code>prixMinVente()</code> sachant que le propriétaire gagne <b>75 %</b> du prix d'achat.`,
+  corrige:`<pre>public class Article {
+    private String codeArticle;
+    private String marque;
+    private double prixHorsTaxe;
+
+    // Constructeur
+    public Article(String codeArticle, String marque, double prixHorsTaxe) {
+        this.codeArticle  = codeArticle;
+        this.marque       = marque;
+        this.prixHorsTaxe = prixHorsTaxe;
+    }
+
+    // 5 % du prix HT
+    public double prixTransport() {
+        return 0.05 * prixHorsTaxe;
+    }
+
+    // 18 % du prix HT
+    public double taxeDouaniere() {
+        return 0.18 * prixHorsTaxe;
+    }
+
+    // prix d'achat total puis marge de 75 %
+    public double prixMinVente() {
+        double prixAchat = prixHorsTaxe + prixTransport() + taxeDouaniere();
+        return prixAchat * 1.75;   // +75 % de bénéfice
+    }
+}</pre>
+  <p class="muted">Points notés : encapsulation (attributs private), constructeur qui initialise via <code>this</code>, réutilisation des méthodes dans <code>prixMinVente()</code>.</p>`},
+
+ {cat:"POO C++",diff:"⏱ 25 min",titre:"Classe CompteBancaire en C++",
+  enonce:`Écris en C++ une classe <code>CompteBancaire</code> avec les attributs privés <code>titulaire</code> (string) et <code>solde</code> (double). Prévois : un constructeur, une méthode <code>deposer(double)</code>, une méthode <code>retirer(double)</code> qui refuse si le solde est insuffisant, et une méthode <code>afficher()</code>.`,
+  corrige:`<pre>#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+class CompteBancaire {
+private:
+    string titulaire;
+    double solde;
+
+public:
+    CompteBancaire(string t, double s = 0.0) {
+        titulaire = t;
+        solde = s;
+    }
+
+    void deposer(double montant) {
+        if (montant > 0) solde += montant;
+    }
+
+    void retirer(double montant) {
+        if (montant &lt;= solde)
+            solde -= montant;
+        else
+            cout &lt;&lt; "Solde insuffisant !" &lt;&lt; endl;
+    }
+
+    void afficher() {
+        cout &lt;&lt; "Titulaire : " &lt;&lt; titulaire
+             &lt;&lt; " | Solde : " &lt;&lt; solde &lt;&lt; endl;
+    }
+};
+
+int main() {
+    CompteBancaire c("Awa", 100);
+    c.deposer(50);
+    c.retirer(200);   // -> Solde insuffisant
+    c.retirer(120);
+    c.afficher();     // -> Solde : 30
+    return 0;
+}</pre>`},
+
+ {cat:"PHP",diff:"⏱ 20 min",titre:"Formulaire d'inscription + traitement",
+  enonce:`Crée une page HTML avec un formulaire (nom, email, mot de passe) envoyé en <b>POST</b> vers <code>traitement.php</code>. Écris <code>traitement.php</code> qui : vérifie que les champs ne sont pas vides, valide le format de l'email, et affiche un message de bienvenue (ou les erreurs).`,
+  corrige:`<h5>inscription.html</h5>
+  <pre>&lt;form action="traitement.php" method="post"&gt;
+  &lt;input type="text"     name="nom"    placeholder="Nom"&gt;
+  &lt;input type="email"    name="email"  placeholder="Email"&gt;
+  &lt;input type="password" name="mdp"    placeholder="Mot de passe"&gt;
+  &lt;button type="submit"&gt;S'inscrire&lt;/button&gt;
+&lt;/form&gt;</pre>
+  <h5>traitement.php</h5>
+  <pre>&lt;?php
+$erreurs = [];
+$nom   = trim($_POST['nom']   ?? '');
+$email = trim($_POST['email'] ?? '');
+$mdp   = $_POST['mdp'] ?? '';
+
+if ($nom === '')                                    $erreurs[] = "Nom obligatoire.";
+if (!filter_var($email, FILTER_VALIDATE_EMAIL))     $erreurs[] = "Email invalide.";
+if (strlen($mdp) &lt; 6)                               $erreurs[] = "Mot de passe trop court.";
+
+if (empty($erreurs)) {
+    echo "Bienvenue " . htmlspecialchars($nom) . " !";
+} else {
+    foreach ($erreurs as $e) echo "&lt;p&gt;$e&lt;/p&gt;";
+}
+?&gt;</pre>
+  <p class="muted">À retenir : <code>$_POST</code>, <code>filter_var(... FILTER_VALIDATE_EMAIL)</code>, et <code>htmlspecialchars()</code> contre l'injection HTML.</p>`},
+
+ {cat:"Excel",diff:"⏱ 20 min",titre:"Feuille POINT — formules de paie",
+  enonce:`D'après la feuille GRILLE (primes par service/grade) et la feuille AGENT, remplis la feuille POINT. Règles : RG1 — la prime dépend du grade et du service. RG2 — retenue de 10 000 pour les hommes. RG3 — pour les femmes : 3 % du salaire de base si &gt; 3 enfants, sinon 5 %. Le salaire de base est en cellule fixe (ex. G2 = 250 000).
+  <ol><li>Écris la formule de la <b>Prime</b> (colonne E).</li>
+  <li>Écris la formule de la <b>Retenue</b> (colonne F).</li>
+  <li>Écris la formule du <b>Salaire net</b> (colonne G).</li>
+  <li>Compte le nombre d'agents bénéficiant de plus de 40 000 de prime.</li></ol>`,
+  corrige:`<pre>-- Hypothèses : Sexe en colonne (…), NbEnfants en (…),
+-- salaire de base fixe en $G$2.
+
+1) Prime (recherche croisée service + grade dans GRILLE) :
+   =INDEX(GRILLE!$C$4:$E$6 ; EQUIV(Service ; GRILLE!$A$4:$A$6 ; 0)
+                          ; EQUIV(Grade   ; GRILLE!$C$2:$E$2 ; 0))
+
+2) Retenue :
+   =SI(Sexe="M" ; 10000 ;
+        SI(NbEnfants>3 ; 3%*$G$2 ; 5%*$G$2))
+
+3) Salaire net :
+   = $G$2 + Prime - Retenue        (soit  =$G$2 + E4 - F4)
+
+4) Nombre d'agents avec prime > 40 000 :
+   =NB.SI(E4:E13 ; ">40000")</pre>
+  <p class="muted">Fonctions clés : <code>SI</code> imbriqué, <code>INDEX/EQUIV</code> (ou <code>RECHERCHEV</code>), <code>NB.SI</code>, et références absolues <code>$G$2</code>.</p>`},
+
+ {cat:"Numération",diff:"⏱ 10 min",titre:"Série de conversions",
+  enonce:`Effectue les conversions suivantes en montrant la démarche :
+  <ol><li><code>110110</code>₂ → décimal</li>
+  <li>212 (décimal) → binaire</li>
+  <li>212 (décimal) → hexadécimal</li>
+  <li><code>3AF</code>₁₆ → décimal</li>
+  <li><code>10110101</code>₂ → hexadécimal (par groupes de 4 bits)</li></ol>`,
+  corrige:`<ol>
+   <li><code>110110</code>₂ = 32+16+0+4+2+0 = <b>54</b>.</li>
+   <li>212 → 212=128+64+16+4 → 11010100. Vérif : 128+64+16+4=212 → <b>11010100</b>₂.</li>
+   <li>212 / 16 = 13 reste 4 ; 13 / 16 = 0 reste 13 (D) → <b>D4</b>₁₆.</li>
+   <li><code>3AF</code> = 3×256 + 10×16 + 15 = 768+160+15 = <b>943</b>.</li>
+   <li><code>1011 0101</code> → 1011=B, 0101=5 → <b>B5</b>₁₆.</li>
+  </ol>`},
+
+ {cat:"Architecture",diff:"⏱ 10 min",titre:"Circuit logique — table de vérité",
+  enonce:`Soit la fonction <code>S = (A ET B) OU (NON A ET C)</code>.
+  <ol><li>Dresse la table de vérité de S pour A, B, C.</li>
+  <li>Combien de lignes comporte la table pour 3 variables ?</li></ol>`,
+  corrige:`<li>Nombre de lignes = 2³ = <b>8</b>.</li>
+  <pre>A B C | A·B | ¬A·C | S
+0 0 0 |  0  |  0   | 0
+0 0 1 |  0  |  1   | 1
+0 1 0 |  0  |  0   | 0
+0 1 1 |  0  |  1   | 1
+1 0 0 |  0  |  0   | 0
+1 0 1 |  0  |  0   | 0
+1 1 0 |  1  |  0   | 1
+1 1 1 |  1  |  0   | 1</pre>
+  <p class="muted">S vaut 1 quand (A et B) sont vrais, ou quand A est faux et C vrai.</p>`},
+
+ {cat:"Numération",diff:"⏱ 15 min · Moyen",titre:"Complément à 2 (nombres signés)",
+  enonce:`<ol><li>Représente <b>−25</b> en complément à 2 sur 8 bits.</li>
+  <li>Le mot binaire signé <code>11101011</code> (8 bits, complément à 2) vaut combien en décimal ?</li>
+  <li>Quel est l'intervalle des entiers représentables en complément à 2 sur 8 bits ?</li></ol>`,
+  corrige:`<ol>
+   <li>25 = <code>00011001</code>. On inverse → <code>11100110</code>, puis +1 → <b>11100111</b> = −25.</li>
+   <li>Bit de signe = 1 → négatif. On inverse <code>11101011</code> → <code>00010100</code>, +1 → <code>00010101</code> = 21. Donc valeur = <b>−21</b>.</li>
+   <li>De −2⁷ à 2⁷−1, soit <b>−128 à +127</b>.</li>
+  </ol>`},
+
+ {cat:"Numération",diff:"⏱ 10 min · Facile",titre:"Opérations arithmétiques binaires",
+  enonce:`Effectue en binaire (et vérifie en décimal) :
+  <ol><li><code>1011</code> + <code>0110</code></li><li><code>1101</code> − <code>0111</code></li><li><code>101</code> × <code>11</code></li></ol>`,
+  corrige:`<ol>
+   <li>1011 (11) + 0110 (6) = <b>10001</b> (17).</li>
+   <li>1101 (13) − 0111 (7) = <b>0110</b> (6).</li>
+   <li>101 (5) × 11 (3) = <b>1111</b> (15).</li>
+  </ol>`},
+
+ {cat:"Numération",diff:"⏱ 15 min · Difficile",titre:"Algèbre de Boole — simplification",
+  enonce:`<ol><li>Simplifie <code>F = A·B + A·B̄</code>.</li>
+  <li>Simplifie <code>G = A + Ā·B</code>.</li>
+  <li>Une fonction vaut 1 pour les minterms Σ(1,3,5,7) sur (A,B,C). Donne l'expression simplifiée.</li></ol>`,
+  corrige:`<ol>
+   <li>F = A·(B+B̄) = A·1 = <b>A</b>.</li>
+   <li>G = A + Ā·B = (A+Ā)·(A+B) = <b>A + B</b> (théorème d'absorption).</li>
+   <li>1=001, 3=011, 5=101, 7=111 : tous ont C=1 → <b>F = C</b>.</li>
+  </ol>`},
+
+ {cat:"Architecture",diff:"⏱ 15 min · Moyen",titre:"Demi-additionneur et additionneur complet",
+  enonce:`<ol><li>Donne les équations logiques d'un <b>demi-additionneur</b> (entrées A, B ; sorties S et retenue C).</li>
+  <li>Donne les équations d'un <b>additionneur complet</b> (entrées A, B, Cₑ ; sorties S et Cₛ).</li></ol>`,
+  corrige:`<ol>
+   <li>Demi-additionneur : <b>S = A ⊕ B</b> ; <b>C = A·B</b>.</li>
+   <li>Additionneur complet : <b>S = A ⊕ B ⊕ Cₑ</b> ; <b>Cₛ = A·B + Cₑ·(A ⊕ B)</b> (retenue si au moins 2 entrées à 1).</li>
+  </ol>`},
+
+ {cat:"Architecture",diff:"⏱ 15 min · Moyen",titre:"Capacité mémoire et bus d'adresse",
+  enonce:`<ol><li>Un processeur possède un bus d'adresse de <b>16 bits</b> et un mot mémoire de 1 octet. Quelle est la taille maximale adressable ?</li>
+  <li>Combien de lignes d'adresse faut-il pour adresser une mémoire de <b>4 K</b> mots ?</li>
+  <li>Quelle est la capacité, en octets, d'une mémoire organisée en <b>4K × 8</b> ?</li></ol>`,
+  corrige:`<ol>
+   <li>2¹⁶ = 65 536 = <b>64 Ko</b> adressables.</li>
+   <li>4 K = 4096 = 2¹² → il faut <b>12 lignes d'adresse</b>.</li>
+   <li>4096 mots × 8 bits = 4096 octets = <b>4 Ko</b>.</li>
+  </ol>`},
+
+ {cat:"Architecture",diff:"⏱ 15 min · Difficile",titre:"Performance de la mémoire cache",
+  enonce:`Une cache a un temps d'accès de <b>10 ns</b>, la mémoire centrale <b>100 ns</b>. Le taux de succès (hit ratio) est de <b>90 %</b>.
+  <ol><li>Calcule le temps d'accès moyen.</li><li>Que devient-il si le taux passe à 95 % ?</li></ol>`,
+  corrige:`<p>Tmoy = h·Tcache + (1−h)·Tmémoire.</p>
+  <ol><li>Tmoy = 0,90×10 + 0,10×100 = 9 + 10 = <b>19 ns</b>.</li>
+   <li>Tmoy = 0,95×10 + 0,05×100 = 9,5 + 5 = <b>14,5 ns</b> → la localité améliore nettement les performances.</li></ol>`},
+
+ {cat:"Réseaux",diff:"⏱ 25 min · Difficile",titre:"VLSM — sous-réseaux de tailles différentes",
+  enonce:`Le réseau <code>192.168.1.0/24</code> doit accueillir 3 sous-réseaux : <b>A = 50 hôtes</b>, <b>B = 20 hôtes</b>, <b>C = 10 hôtes</b>. Attribue à chacun son bloc (adresse réseau, masque, plage, broadcast) en gaspillant le moins d'adresses possible.`,
+  corrige:`<p>On commence par le plus grand (VLSM) :</p>
+  <pre>A (50 hôtes) : /26 -> 62 hôtes
+   Réseau 192.168.1.0/26   | hôtes .1 à .62   | broadcast .63
+B (20 hôtes) : /27 -> 30 hôtes
+   Réseau 192.168.1.64/27  | hôtes .65 à .94  | broadcast .95
+C (10 hôtes) : /28 -> 14 hôtes
+   Réseau 192.168.1.96/28  | hôtes .97 à .110 | broadcast .111</pre>
+  <p class="muted">Règle : bits hôtes n tels que 2ⁿ−2 ≥ besoin. 50→6 bits (/26), 20→5 bits (/27), 10→4 bits (/28).</p>`},
+
+ {cat:"Réseaux",diff:"⏱ 15 min · Moyen",titre:"Adresse réseau et broadcast à partir d'une IP",
+  enonce:`Soit l'hôte <code>172.16.20.200</code> avec le masque <code>/21</code>.
+  <ol><li>Donne le masque en décimal pointé.</li><li>Donne l'adresse du réseau.</li>
+  <li>Donne l'adresse de broadcast.</li><li>Donne la plage d'adresses hôtes utilisables.</li></ol>`,
+  corrige:`<ol>
+   <li>/21 → <b>255.255.248.0</b>.</li>
+   <li>Bloc du 3ᵉ octet = 256−248 = 8 → multiples de 8 : …16, 24… 200 est dans le bloc où le 3ᵉ octet = 16 (16 ≤ 20 &lt; 24). Réseau = <b>172.16.16.0</b>.</li>
+   <li>Broadcast = <b>172.16.23.255</b> (dernier du bloc 16→23).</li>
+   <li>Hôtes utilisables : <b>172.16.16.1 → 172.16.23.254</b> (2 046 hôtes).</li>
+  </ol>`},
+
+ {cat:"Réseaux",diff:"⏱ 15 min · Facile",titre:"Modèle OSI — couches et protocoles",
+  enonce:`<ol><li>Cite les 7 couches du modèle OSI dans l'ordre.</li>
+  <li>Associe à sa couche : IP, TCP, HTTP, Ethernet, UDP, FTP.</li>
+  <li>Quelle est la différence essentielle entre TCP et UDP ?</li></ol>`,
+  corrige:`<ol>
+   <li>1-Physique, 2-Liaison, 3-Réseau, 4-Transport, 5-Session, 6-Présentation, 7-Application.</li>
+   <li>Ethernet → Liaison(2) ; IP → Réseau(3) ; TCP et UDP → Transport(4) ; HTTP et FTP → Application(7).</li>
+   <li><b>TCP</b> = orienté connexion, fiable (accusés, ordre garanti). <b>UDP</b> = sans connexion, rapide, non fiable.</li>
+  </ol>`},
+
+ {cat:"UML",diff:"⏱ 20 min · Moyen",titre:"Diagramme de séquence — authentification",
+  enonce:`Décris le diagramme de séquence de la connexion d'un utilisateur : il saisit login/mot de passe dans l'IHM, un contrôleur vérifie auprès de la base, et selon le résultat affiche l'accueil ou un message d'erreur. Liste les messages et le fragment alternatif.`,
+  corrige:`<pre>Utilisateur -> IHM        : saisir(login, mdp)
+IHM         -> Controleur : authentifier(login, mdp)
+Controleur  -> BD         : SELECT * FROM users WHERE login=?
+BD          --> Controleur : résultat
+alt [identifiants valides]
+   Controleur --> IHM : succès
+   IHM        --> Utilisateur : afficher page d'accueil
+else [invalides]
+   Controleur --> IHM : échec
+   IHM        --> Utilisateur : afficher "login/mdp incorrect"
+end</pre>
+  <p class="muted">Objets = lignes de vie ; messages synchrones (flèche pleine), retours (pointillés) ; le bloc <code>alt</code> gère les deux cas.</p>`},
+
+ {cat:"UML",diff:"⏱ 15 min · Moyen",titre:"Diagramme d'états — cycle de vie d'une commande",
+  enonce:`Modélise le diagramme d'états-transitions d'une commande en ligne, depuis sa création jusqu'à la livraison, avec possibilité d'annulation.`,
+  corrige:`<pre>[*] -> Créée
+Créée    -> Validée   : valider()
+Validée  -> Payée     : payer()
+Payée    -> Expédiée  : expédier()
+Expédiée -> Livrée    : livrer()
+Livrée   -> [*]
+Créée    -> Annulée   : annuler()
+Validée  -> Annulée   : annuler()
+Annulée  -> [*]</pre>
+  <p class="muted">États = rectangles arrondis ; transitions déclenchées par des événements/actions ; une commande ne peut plus être annulée après paiement.</p>`},
+
+ {cat:"UML",diff:"⏱ 25 min · Difficile",titre:"Cas d'utilisation + classes — bibliothèque",
+  enonce:`Une bibliothèque gère le prêt de livres. Un adhérent recherche un livre, l'emprunte (max 3 à la fois, 15 jours), le retourne, ou le réserve s'il est indisponible. Le bibliothécaire enregistre les retours et gère le catalogue.
+  <ol><li>Acteurs et 4 cas d'utilisation.</li><li>Classes principales avec associations et multiplicités.</li></ol>`,
+  corrige:`<h5>Acteurs & cas d'utilisation</h5>
+  <ul><li>Acteurs : <b>Adhérent</b>, <b>Bibliothécaire</b>.</li>
+  <li>UC : Rechercher un livre · Emprunter un exemplaire · Retourner un exemplaire · Réserver un livre · (Bibliothécaire) Gérer le catalogue.</li></ul>
+  <h5>Classes</h5>
+  <pre>Livre (isbn, titre, auteur)            1 --- 1..* Exemplaire
+Exemplaire (codeExemplaire, état)      1 --- 0..* Emprunt
+Adhérent (numAdh, nom, email)          1 --- 0..* Emprunt
+Emprunt (dateEmprunt, dateRetourPrévue, dateRetourRéelle)
+Réservation (dateRésa)   Adhérent 1---0..* Réservation *---1 Livre</pre>
+  <p class="muted">Règle de gestion : un adhérent a au plus 3 emprunts en cours ; un exemplaire a un seul emprunt actif.</p>`},
+
+ {cat:"BD / SQL",diff:"⏱ 25 min · Difficile",titre:"Normalisation 1FN → 3FN",
+  enonce:`Soit la table brute : <code>COMMANDE(numCmd, dateCmd, numClient, nomClient, numProduit, libellé, prixU, qté)</code> où une commande contient plusieurs produits.
+  <ol><li>Pourquoi n'est-elle pas en 1FN ? Corrige.</li>
+  <li>Mets en 2FN.</li><li>Mets en 3FN. Donne le schéma final.</li></ol>`,
+  corrige:`<ol>
+   <li><b>1FN</b> : un attribut multivalué (plusieurs produits par commande). On éclate en lignes atomiques, clé = (numCmd, numProduit).</li>
+   <li><b>2FN</b> : dépendances partielles — <code>libellé, prixU</code> dépendent de numProduit seul ; <code>dateCmd, numClient, nomClient</code> dépendent de numCmd seul. On sépare.</li>
+   <li><b>3FN</b> : <code>nomClient</code> dépend de numClient (transitive via numCmd) → table CLIENT à part.</li>
+  </ol>
+  <pre>CLIENT(numClient, nomClient)
+PRODUIT(numProduit, libellé, prixU)
+COMMANDE(numCmd, dateCmd, #numClient)
+LIGNE_CMD(#numCmd, #numProduit, qté)   -- clé composée</pre>`},
+
+ {cat:"BD / SQL",diff:"⏱ 20 min · Moyen",titre:"Concevoir un MCD à partir d'un énoncé",
+  enonce:`Dans une école : un étudiant s'inscrit à plusieurs cours ; un cours est enseigné par un seul professeur mais un professeur enseigne plusieurs cours ; pour chaque cours suivi, l'étudiant obtient une note. Propose le modèle entité-association (entités, associations, cardinalités) puis le relationnel.`,
+  corrige:`<h5>MCD</h5>
+  <pre>ÉTUDIANT (numEt, nom, prénom)
+PROFESSEUR (numProf, nom)
+COURS (numCours, intitulé)
+PROFESSEUR (1,n) --- Enseigner --- (1,1) COURS
+ÉTUDIANT (0,n) --- Suivre[note] --- (0,n) COURS</pre>
+  <h5>Relationnel</h5>
+  <pre>PROFESSEUR(numProf, nom)
+COURS(numCours, intitulé, #numProf)
+ÉTUDIANT(numEt, nom, prénom)
+SUIVRE(#numEt, #numCours, note)   -- association n,n porteuse d'attribut</pre>`},
+
+ {cat:"BD / SQL",diff:"⏱ 35 min · Difficile",titre:"SQL progressif — Employés / Départements",
+  enonce:`Schéma : <code>EMP(numE, nom, salaire, poste, #numDept, #numChef)</code> et <code>DEPT(numDept, nomDept, ville)</code>. Écris les requêtes :
+  <ol><li>Tous les employés triés par salaire décroissant.</li>
+  <li>Salaire moyen par département.</li>
+  <li>Départements ayant plus de 3 employés.</li>
+  <li>Employés gagnant plus que le salaire moyen global.</li>
+  <li>Employés sans chef.</li>
+  <li>Nombre d'employés par ville.</li>
+  <li>Départements n'ayant aucun employé.</li>
+  <li>Augmenter de 10 % les salaires du département 'Informatique'.</li></ol>`,
+  corrige:`<pre>-- 1
+SELECT * FROM EMP ORDER BY salaire DESC;
+
+-- 2
+SELECT numDept, AVG(salaire) FROM EMP GROUP BY numDept;
+
+-- 3
+SELECT numDept, COUNT(*) FROM EMP
+GROUP BY numDept HAVING COUNT(*) > 3;
+
+-- 4
+SELECT nom, salaire FROM EMP
+WHERE salaire > (SELECT AVG(salaire) FROM EMP);
+
+-- 5
+SELECT nom FROM EMP WHERE numChef IS NULL;
+
+-- 6
+SELECT D.ville, COUNT(E.numE)
+FROM DEPT D JOIN EMP E ON E.numDept = D.numDept
+GROUP BY D.ville;
+
+-- 7
+SELECT D.nomDept FROM DEPT D
+LEFT JOIN EMP E ON E.numDept = D.numDept
+WHERE E.numE IS NULL;
+
+-- 8
+UPDATE EMP SET salaire = salaire * 1.10
+WHERE numDept = (SELECT numDept FROM DEPT WHERE nomDept = 'Informatique');</pre>`},
+
+ {cat:"POO Java",diff:"⏱ 25 min · Moyen",titre:"Héritage et polymorphisme — formes géométriques",
+  enonce:`Crée une classe abstraite <code>Forme</code> avec une méthode abstraite <code>aire()</code>. Dérive <code>Cercle</code> et <code>Rectangle</code>. Dans un <code>main</code>, mets plusieurs formes dans un tableau et affiche la somme des aires (polymorphisme).`,
+  corrige:`<pre>abstract class Forme {
+    abstract double aire();
+}
+class Cercle extends Forme {
+    double r;
+    Cercle(double r){ this.r = r; }
+    double aire(){ return Math.PI * r * r; }
+}
+class Rectangle extends Forme {
+    double L, l;
+    Rectangle(double L, double l){ this.L = L; this.l = l; }
+    double aire(){ return L * l; }
+}
+public class Test {
+    public static void main(String[] a){
+        Forme[] formes = { new Cercle(2), new Rectangle(3, 4) };
+        double total = 0;
+        for (Forme f : formes) total += f.aire();  // polymorphisme
+        System.out.println("Aire totale = " + total);
+    }
+}</pre>
+  <p class="muted">Le type déclaré est <code>Forme</code>, l'appel <code>f.aire()</code> exécute la version de la vraie classe (liaison dynamique).</p>`},
+
+ {cat:"POO Java",diff:"⏱ 25 min · Moyen",titre:"Interface + collection (ArrayList)",
+  enonce:`Définis une interface <code>Comparable</code>-like ou utilise <code>Comparable&lt;Etudiant&gt;</code> : classe <code>Etudiant(nom, moyenne)</code>. Stocke des étudiants dans une <code>ArrayList</code> et trie-les par moyenne décroissante.`,
+  corrige:`<pre>import java.util.*;
+
+class Etudiant implements Comparable&lt;Etudiant&gt; {
+    String nom; double moyenne;
+    Etudiant(String n, double m){ nom = n; moyenne = m; }
+    public int compareTo(Etudiant e){
+        return Double.compare(e.moyenne, this.moyenne); // décroissant
+    }
+    public String toString(){ return nom + " (" + moyenne + ")"; }
+}
+public class Main {
+    public static void main(String[] a){
+        ArrayList&lt;Etudiant&gt; liste = new ArrayList&lt;&gt;();
+        liste.add(new Etudiant("Awa", 14));
+        liste.add(new Etudiant("Koffi", 17));
+        liste.add(new Etudiant("Lina", 12));
+        Collections.sort(liste);
+        System.out.println(liste);
+    }
+}</pre>`},
+
+ {cat:"POO Java",diff:"⏱ 20 min · Difficile",titre:"Gestion des exceptions",
+  enonce:`Écris une méthode <code>diviser(int a, int b)</code> qui lève et gère la division par zéro, puis crée ta propre exception <code>SoldeInsuffisantException</code> utilisée par une méthode <code>retirer</code>.`,
+  corrige:`<pre>class SoldeInsuffisantException extends Exception {
+    SoldeInsuffisantException(String m){ super(m); }
+}
+public class Banque {
+    static int diviser(int a, int b){
+        try { return a / b; }
+        catch (ArithmeticException e){
+            System.out.println("Division par zéro !");
+            return 0;
+        }
+    }
+    double solde = 100;
+    void retirer(double m) throws SoldeInsuffisantException {
+        if (m > solde) throw new SoldeInsuffisantException("Solde insuffisant");
+        solde -= m;
+    }
+    public static void main(String[] a){
+        System.out.println(diviser(10, 0));
+        Banque b = new Banque();
+        try { b.retirer(200); }
+        catch (SoldeInsuffisantException e){ System.out.println(e.getMessage()); }
+    }
+}</pre>`},
+
+ {cat:"POO C++",diff:"⏱ 25 min · Difficile",titre:"Surcharge d'opérateur — nombres complexes",
+  enonce:`Crée une classe <code>Complexe(re, im)</code> en C++ et surcharge l'opérateur <code>+</code> pour additionner deux complexes, ainsi qu'une méthode d'affichage.`,
+  corrige:`<pre>#include &lt;iostream&gt;
+using namespace std;
+
+class Complexe {
+    double re, im;
+public:
+    Complexe(double r = 0, double i = 0){ re = r; im = i; }
+    Complexe operator+(const Complexe&amp; c){
+        return Complexe(re + c.re, im + c.im);
+    }
+    void afficher(){ cout &lt;&lt; re &lt;&lt; " + " &lt;&lt; im &lt;&lt; "i" &lt;&lt; endl; }
+};
+int main(){
+    Complexe a(3, 4), b(1, 2);
+    Complexe c = a + b;   // appelle operator+
+    c.afficher();         // 4 + 6i
+    return 0;
+}</pre>`},
+
+ {cat:"POO C++",diff:"⏱ 20 min · Moyen",titre:"Héritage et méthode virtuelle",
+  enonce:`Classe de base <code>Animal</code> avec méthode virtuelle <code>crier()</code>. Dérive <code>Chien</code> et <code>Chat</code>. Montre le polymorphisme via un pointeur <code>Animal*</code>.`,
+  corrige:`<pre>#include &lt;iostream&gt;
+using namespace std;
+
+class Animal {
+public:
+    virtual void crier(){ cout &lt;&lt; "..." &lt;&lt; endl; }
+};
+class Chien : public Animal {
+public:
+    void crier() override { cout &lt;&lt; "Ouaf" &lt;&lt; endl; }
+};
+class Chat : public Animal {
+public:
+    void crier() override { cout &lt;&lt; "Miaou" &lt;&lt; endl; }
+};
+int main(){
+    Animal* a = new Chien();
+    a->crier();          // Ouaf (liaison dynamique grâce à 'virtual')
+    a = new Chat();
+    a->crier();          // Miaou
+    return 0;
+}</pre>
+  <p class="muted">Sans le mot-clé <code>virtual</code>, c'est la méthode de la classe de base qui serait appelée.</p>`},
+
+ {cat:"PHP",diff:"⏱ 25 min · Moyen",titre:"Authentification avec sessions",
+  enonce:`Écris <code>login.php</code> qui vérifie un couple utilisateur/mot de passe, ouvre une session, puis <code>accueil.php</code> qui protège la page, et <code>logout.php</code> qui détruit la session.`,
+  corrige:`<pre>// login.php
+&lt;?php
+session_start();
+$users = ['admin' =&gt; 'secret'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $u = $_POST['user']; $p = $_POST['pass'];
+    if (isset($users[$u]) &amp;&amp; $users[$u] === $p) {
+        $_SESSION['user'] = $u;
+        header('Location: accueil.php');
+    } else { echo "Identifiants invalides"; }
+}
+?&gt;
+
+// accueil.php
+&lt;?php
+session_start();
+if (!isset($_SESSION['user'])) { header('Location: login.php'); exit; }
+echo "Bienvenue " . $_SESSION['user'];
+?&gt;
+
+// logout.php
+&lt;?php
+session_start();
+session_destroy();
+header('Location: login.php');
+?&gt;</pre>
+  <p class="muted">En production : mots de passe hachés avec <code>password_hash()</code> / <code>password_verify()</code>.</p>`},
+
+ {cat:"PHP",diff:"⏱ 30 min · Difficile",titre:"CRUD avec PDO / MySQL",
+  enonce:`Connecte-toi à une base MySQL avec PDO, puis écris une insertion sécurisée (requête préparée) et une lecture de tous les produits.`,
+  corrige:`<pre>&lt;?php
+try {
+    $pdo = new PDO('mysql:host=localhost;dbname=boutique;charset=utf8',
+                   'root', '');
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // INSERT sécurisé (requête préparée -> anti-injection)
+    $req = $pdo->prepare(
+        "INSERT INTO produit (nom, prix) VALUES (:nom, :prix)");
+    $req->execute([':nom' =&gt; 'Clavier', ':prix' =&gt; 25.5]);
+
+    // SELECT
+    $liste = $pdo->query("SELECT * FROM produit")->fetchAll();
+    foreach ($liste as $p) {
+        echo $p['nom'] . " : " . $p['prix'] . "&lt;br&gt;";
+    }
+} catch (PDOException $e) {
+    echo "Erreur : " . $e->getMessage();
+}
+?&gt;</pre>`},
+
+ {cat:"PHP",diff:"⏱ 15 min · Facile",titre:"Manipulation de tableaux et de chaînes",
+  enonce:`<ol><li>Découpe la chaîne <code>"php,html,css,sql"</code> en tableau et affiche le nombre d'éléments.</li>
+  <li>Parcours un tableau associatif <code>['Awa'=>15,'Koffi'=>12]</code> et affiche « nom : note ».</li>
+  <li>Mets une chaîne en majuscules et donne sa longueur.</li></ol>`,
+  corrige:`<pre>&lt;?php
+// 1
+$t = explode(",", "php,html,css,sql");
+echo count($t);                 // 4
+
+// 2
+$notes = ['Awa' =&gt; 15, 'Koffi' =&gt; 12];
+foreach ($notes as $nom =&gt; $note) {
+    echo "$nom : $note&lt;br&gt;";
+}
+
+// 3
+$s = "licence";
+echo strtoupper($s);            // LICENCE
+echo strlen($s);                // 7
+?&gt;</pre>`},
+
+ {cat:"Web",diff:"⏱ 25 min · Moyen",titre:"Mise en page HTML/CSS avec Flexbox",
+  enonce:`Réalise une page avec un en-tête, une barre de navigation horizontale, un contenu à deux colonnes (menu latéral + article) et un pied de page, en utilisant <b>Flexbox</b>.`,
+  corrige:`<pre>&lt;!DOCTYPE html&gt;
+&lt;html lang="fr"&gt;&lt;head&gt;&lt;meta charset="UTF-8"&gt;
+&lt;style&gt;
+  body{margin:0;font-family:sans-serif}
+  header,footer{background:#333;color:#fff;padding:1rem;text-align:center}
+  nav{display:flex;gap:1rem;background:#eee;padding:.5rem}
+  .main{display:flex}
+  aside{flex:1;background:#f4f4f4;padding:1rem}
+  article{flex:3;padding:1rem}
+&lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+  &lt;header&gt;Mon site&lt;/header&gt;
+  &lt;nav&gt;&lt;a href="#"&gt;Accueil&lt;/a&gt;&lt;a href="#"&gt;Cours&lt;/a&gt;&lt;/nav&gt;
+  &lt;div class="main"&gt;
+    &lt;aside&gt;Menu&lt;/aside&gt;
+    &lt;article&gt;Contenu principal&lt;/article&gt;
+  &lt;/div&gt;
+  &lt;footer&gt;© 2026&lt;/footer&gt;
+&lt;/body&gt;&lt;/html&gt;</pre>
+  <p class="muted"><code>display:flex</code> aligne les enfants ; <code>flex:1</code> vs <code>flex:3</code> répartit la largeur (1/4 et 3/4).</p>`},
+
+ {cat:"Web",diff:"⏱ 20 min · Moyen",titre:"Bootstrap — navbar et cartes responsives",
+  enonce:`Avec Bootstrap, crée une barre de navigation et une rangée de 3 cartes qui passent sur une seule colonne en mobile.`,
+  corrige:`<pre>&lt;link href="bootstrap.min.css" rel="stylesheet"&gt;
+
+&lt;nav class="navbar navbar-expand-lg navbar-dark bg-dark"&gt;
+  &lt;a class="navbar-brand" href="#"&gt;Logo&lt;/a&gt;
+&lt;/nav&gt;
+
+&lt;div class="container mt-4"&gt;
+  &lt;div class="row"&gt;
+    &lt;div class="col-12 col-md-4"&gt;
+      &lt;div class="card"&gt;&lt;div class="card-body"&gt;Carte 1&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="col-12 col-md-4"&gt;
+      &lt;div class="card"&gt;&lt;div class="card-body"&gt;Carte 2&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="col-12 col-md-4"&gt;
+      &lt;div class="card"&gt;&lt;div class="card-body"&gt;Carte 3&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+  <p class="muted"><code>col-12</code> = pleine largeur (mobile) ; <code>col-md-4</code> = 3 colonnes dès la taille md (4+4+4=12).</p>`},
+
+ {cat:"Excel",diff:"⏱ 20 min · Moyen",titre:"RECHERCHEV et fonctions conditionnelles",
+  enonce:`Une feuille TARIF contient (A2:B6) des codes produits et leurs prix. Dans une facture, à partir d'un code saisi en D2 :
+  <ol><li>Affiche le prix correspondant.</li><li>Applique une remise de 10 % si la quantité (E2) &gt; 100.</li>
+  <li>Gère le cas d'un code introuvable.</li></ol>`,
+  corrige:`<pre>1) Prix :
+   =RECHERCHEV(D2 ; TARIF!$A$2:$B$6 ; 2 ; FAUX)
+
+2) Prix après remise :
+   =SI(E2>100 ; Prix*0.9 ; Prix)
+   soit : =SI(E2>100 ;
+             RECHERCHEV(D2;TARIF!$A$2:$B$6;2;FAUX)*0.9 ;
+             RECHERCHEV(D2;TARIF!$A$2:$B$6;2;FAUX))
+
+3) Code introuvable :
+   =SIERREUR(RECHERCHEV(D2;TARIF!$A$2:$B$6;2;FAUX) ; "Code inconnu")</pre>
+  <p class="muted">4ᵉ argument <code>FAUX</code> = correspondance exacte ; <code>$</code> = références absolues à la table.</p>`},
+
+ {cat:"Excel",diff:"⏱ 15 min · Facile",titre:"Fonctions statistiques conditionnelles",
+  enonce:`Une plage AGENTS a le service en colonne A, le sexe en B, le salaire en C (lignes 2 à 20).
+  <ol><li>Somme des salaires du service 'SI'.</li><li>Nombre de femmes du service 'SC'.</li>
+  <li>Salaire moyen des hommes.</li></ol>`,
+  corrige:`<pre>1) =SOMME.SI(A2:A20 ; "SI" ; C2:C20)
+
+2) =NB.SI.ENS(A2:A20 ; "SC" ; B2:B20 ; "F")
+
+3) =MOYENNE.SI(B2:B20 ; "M" ; C2:C20)</pre>`},
+
+ {cat:"Algorithmique",diff:"⏱ 20 min · Moyen",titre:"Tri à bulles et recherche",
+  enonce:`<ol><li>Écris en pseudocode l'algorithme du <b>tri à bulles</b> d'un tableau T de n entiers.</li>
+  <li>Écris la <b>recherche dichotomique</b> d'une valeur x dans un tableau trié.</li></ol>`,
+  corrige:`<pre>// 1) Tri à bulles
+pour i de 0 à n-2 faire
+   pour j de 0 à n-2-i faire
+      si T[j] > T[j+1] alors
+         échanger T[j] et T[j+1]
+      finsi
+   finpour
+finpour
+
+// 2) Recherche dichotomique (T trié croissant)
+deb <- 0 ; fin <- n-1
+tantque deb <= fin faire
+   mil <- (deb + fin) / 2
+   si T[mil] = x alors retourner mil
+   sinon si T[mil] < x alors deb <- mil + 1
+   sinon fin <- mil - 1
+   finsi
+fintantque
+retourner -1   // non trouvé</pre>
+  <p class="muted">Tri à bulles : complexité O(n²). Dichotomie : O(log n), nécessite un tableau trié.</p>`},
+
+ {cat:"Algorithmique",diff:"⏱ 15 min · Facile",titre:"Factorielle — itérative et récursive",
+  enonce:`Écris la fonction factorielle de deux façons : itérative (boucle) et récursive, en pseudocode ou en langage de ton choix.`,
+  corrige:`<pre>// Itérative
+fonction factIter(n) :
+   r <- 1
+   pour i de 2 à n faire
+      r <- r * i
+   finpour
+   retourner r
+
+// Récursive
+fonction factRec(n) :
+   si n <= 1 alors retourner 1
+   sinon retourner n * factRec(n-1)
+   finsi</pre>
+  <p class="muted">Cas de base indispensable en récursif (n ≤ 1) pour arrêter les appels.</p>`}
+];
+
+function renderExos(filter){
+  const list=document.getElementById('exoList');list.innerHTML='';
+  const cats=['Tous',...[...new Set(EXOS.map(e=>e.cat))]];
+  const fbar=document.getElementById('exoFilter');
+  if(!fbar.dataset.built){
+    cats.forEach(c=>{const b=document.createElement('button');b.textContent=c;
+      if(c==='Tous')b.classList.add('active');
+      b.addEventListener('click',()=>{fbar.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');renderExos(c==='Tous'?null:c);});
+      fbar.appendChild(b);});
+    fbar.dataset.built='1';
+  }
+  EXOS.filter(e=>!filter||e.cat===filter).forEach((e,i)=>{
+    const div=document.createElement('div');div.className='exo';
+    div.innerHTML=`<span class="diff">${e.diff}</span><span class="cat">${e.cat}</span>
+      <h4>${e.titre}</h4><div class="enonce">${e.enonce}</div>
+      <button class="reveal-btn">Voir le corrigé détaillé</button>
+      <div class="corrige"><h5>Corrigé</h5>${e.corrige}</div>`;
+    div.querySelector('.reveal-btn').addEventListener('click',ev=>{
+      const c=div.querySelector('.corrige');c.classList.toggle('show');
+      ev.target.textContent=c.classList.contains('show')?'Masquer le corrigé':'Voir le corrigé détaillé';
+    });
+    list.appendChild(div);
+  });
+}
+
+/* ---------- init (legacy, hidden — sert de secours hors-ligne) ---------- */
+updateCountdown();renderPlan();renderThemeGrid();renderExos(null);
+try{ window.__DATA__={PLAN:PLAN, BANK:BANK, EXOS:EXOS}; }catch(e){}
+</script>
+
+<!-- ===================== UI shadcn/ui (React) ===================== -->
+<script type="text/babel" data-presets="react">
+(function(){
+const {useState, useEffect, useMemo} = React;
+const DATA = window.__DATA__ || {PLAN:[],BANK:{},EXOS:[]};
+const PLAN = DATA.PLAN, BANK = DATA.BANK, EXOS = DATA.EXOS;
+const cn = (...a)=>a.filter(Boolean).join(' ');
+const PLAN_LEN = 24;
+
+/* ---- primitives shadcn/ui ---- */
+function Button({variant='default',size='default',className='',...p}){
+  const v={
+    default:'bg-primary text-primary-foreground hover:bg-primary/90',
+    secondary:'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+    outline:'border border-input bg-transparent hover:bg-accent hover:text-accent-foreground',
+    ghost:'hover:bg-accent hover:text-accent-foreground'
+  };
+  const s={default:'h-10 px-4 py-2', sm:'h-9 px-3 text-sm', lg:'h-11 px-8', icon:'h-10 w-10'};
+  return <button className={cn('inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50', v[variant], s[size], className)} {...p}/>;
+}
+function Badge({variant='default',className='',...p}){
+  const v={
+    default:'border-transparent bg-primary text-primary-foreground',
+    secondary:'border-transparent bg-secondary text-secondary-foreground',
+    outline:'text-foreground border-border',
+    success:'border-transparent bg-emerald-500/15 text-emerald-400',
+    warn:'border-transparent bg-amber-500/15 text-amber-400',
+    destructive:'border-transparent bg-red-500/15 text-red-400'
+  };
+  return <span className={cn('inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold', v[variant], className)} {...p}/>;
+}
+const Card=({className='',...p})=><div className={cn('rounded-lg border border-border bg-card text-card-foreground shadow-sm', className)} {...p}/>;
+const CardHeader=({className='',...p})=><div className={cn('flex flex-col space-y-1.5 p-5', className)} {...p}/>;
+const CardTitle=({className='',...p})=><h3 className={cn('text-lg font-semibold leading-none tracking-tight', className)} {...p}/>;
+const CardDescription=({className='',...p})=><p className={cn('text-sm text-muted-foreground', className)} {...p}/>;
+const CardContent=({className='',...p})=><div className={cn('p-5 pt-0', className)} {...p}/>;
+function Progress({value=0,className=''}){
+  return <div className={cn('h-2.5 w-full overflow-hidden rounded-full bg-secondary', className)}>
+    <div className="h-full bg-primary transition-all" style={{width:Math.max(0,Math.min(100,value))+'%'}}/></div>;
+}
+function Alert({tone='info',className='',children}){
+  const t={info:'border-border bg-muted/40 text-foreground', good:'border-emerald-500/30 bg-emerald-500/10',
+    bad:'border-red-500/30 bg-red-500/10'};
+  return <div className={cn('rounded-lg border p-3 text-sm', t[tone], className)}>{children}</div>;
+}
+const Separator=({className=''})=><div className={cn('h-px w-full bg-border', className)}/>;
+function Html({html,className=''}){ return <span className={className} dangerouslySetInnerHTML={{__html:html}}/>; }
+
+/* ---- Tabs ---- */
+const TABS=[['plan','📅 Plan J-24'],['quiz','📝 Quiz'],['exos','🧩 Exercices'],
+  ['fiches','⚡ Fiches'],['method','🧠 Méthode'],['liens','🔗 Ressources']];
+function TabsBar({active,onChange}){
+  return <div className="sticky top-0 z-20 -mx-4 mb-6 border-b border-border bg-background/85 px-4 py-2 backdrop-blur">
+    <div className="mx-auto flex max-w-4xl flex-wrap justify-center gap-1">
+      {TABS.map(([id,label])=>(
+        <button key={id} onClick={()=>onChange(id)}
+          className={cn('rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors',
+            active===id?'bg-primary text-primary-foreground':'text-muted-foreground hover:bg-accent hover:text-accent-foreground')}>
+          {label}</button>))}
+    </div></div>;
+}
+
+/* ---- countdown helpers ---- */
+function defaultExam(){const d=new Date();d.setDate(d.getDate()+PLAN_LEN);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function daysLeft(dateStr){const now=new Date();now.setHours(0,0,0,0);
+  const ex=new Date(dateStr+'T00:00:00');return Math.round((ex-now)/86400000);}
+
+/* ---- Header ---- */
+function Header({exam,setExam}){
+  const dl=daysLeft(exam);
+  const planDay=(dl>=0&&dl<=PLAN_LEN)?(PLAN_LEN-dl+1):null;
+  return <div className="border-b border-border bg-gradient-to-b from-primary/10 to-transparent">
+    <div className="mx-auto max-w-4xl px-4 py-7 text-center">
+      <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">🎓 Prépa Examen National de Licence — SIL</h1>
+      <p className="mt-1 text-sm text-muted-foreground">Système Informatique et Logiciel · Tronc Commun + Spécialité · Révision quotidienne</p>
+      <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+        <Card className="px-5 py-2"><div className="text-3xl font-extrabold text-primary">{dl>=0?dl:0}</div>
+          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">jours restants</div></Card>
+        <Card className="px-5 py-2"><div className="text-3xl font-extrabold text-primary">{planDay?planDay+'/'+PLAN_LEN:'—'}</div>
+          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">jour du plan</div></Card>
+      </div>
+      <div className="mt-3 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+        <span>📅 Date de l'examen :</span>
+        <input type="date" value={exam} onChange={e=>setExam(e.target.value)}
+          className="rounded-md border border-input bg-secondary px-2 py-1 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"/>
+      </div>
+    </div></div>;
+}
+
+/* ---- Plan ---- */
+function PlanView({onRevise,exam}){
+  const dl=daysLeft(exam);
+  const today=(dl>=0&&dl<=PLAN_LEN)?(PLAN_LEN-dl+1):-1;
+  return <div>
+    <h2 className="mb-2 text-xl font-semibold text-primary">Calendrier de révision jour par jour</h2>
+    <p className="mb-4 text-sm text-muted-foreground">Le plan tourne sur tous les thèmes, alterne apprentissage / reprise / examens blancs. Clique sur « Réviser » pour lancer le quiz du thème.</p>
+    <div className="space-y-2">
+      {PLAN.map((it,idx)=> it.ph
+        ? <div key={idx} className="pt-4 pb-1 text-xs font-semibold uppercase tracking-widest text-amber-400">{it.ph}</div>
+        : <Card key={idx} className={cn('flex items-center gap-3 p-3', it.d===today && 'ring-2 ring-primary')}>
+            <Badge variant={it.d===today?'default':'secondary'} className="min-w-[46px] justify-center">J{it.d}</Badge>
+            <div className="flex-1"><div className="text-sm font-medium">{it.t}</div>
+              <div className="text-xs text-muted-foreground">{it.s}</div></div>
+            <Button size="sm" variant="outline" onClick={()=>onRevise(it.k)}>Réviser</Button>
+          </Card>)}
+    </div></div>;
+}
+
+/* ---- Quiz ---- */
+function QuizHome({onPick}){
+  return <div>
+    <h2 className="mb-2 text-xl font-semibold text-primary">Choisis un thème à réviser</h2>
+    <p className="mb-4 text-sm text-muted-foreground">QCM, Vrai/Faux et questions-réponses. Réponds, puis « Corriger » pour ta note et les explications. Objectif : ≥ 80 %.</p>
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {Object.keys(BANK).map(k=>(
+        <button key={k} onClick={()=>onPick(k)}
+          className="rounded-lg border border-border bg-card p-4 text-left transition-colors hover:border-primary hover:bg-accent">
+          <div className="font-semibold">{BANK[k].title}</div>
+          <div className="mt-1 text-xs text-muted-foreground">{BANK[k].qs.length} questions</div>
+        </button>))}
+    </div></div>;
+}
+const TYPE_LABEL={qcm:'QCM · 1 réponse',multi:'QCM · plusieurs réponses',vf:'Vrai / Faux',short:'Question-réponse'};
+function arrEq(a,b){a=[...(a||[])].sort();b=[...(b||[])].sort();return a.length===b.length&&a.every((x,i)=>x===b[i]);}
+function QuizRunner({bankKey,onBack}){
+  const data=BANK[bankKey];
+  const [ans,setAns]=useState({});
+  const [checked,setChecked]=useState(false);
+  useEffect(()=>{setAns({});setChecked(false);window.scrollTo({top:0,behavior:'smooth'});},[bankKey]);
+  const setOne=(i,v)=>setAns(a=>({...a,[i]:v}));
+  const toggle=(i,j)=>setAns(a=>{const cur=new Set(a[i]||[]);cur.has(j)?cur.delete(j):cur.add(j);return {...a,[i]:[...cur]};});
+  const isOk=(q,i)=>{ if(q.type==='qcm')return ans[i]===q.a;
+    if(q.type==='vf')return (ans[i]==='true')===q.a;
+    if(q.type==='multi')return arrEq(ans[i],q.a); return false; };
+  const gradable=data.qs.filter(q=>q.type!=='short').length;
+  const score=data.qs.reduce((n,q,i)=>n+((q.type!=='short'&&isOk(q,i))?1:0),0);
+  const pct=gradable?Math.round(score/gradable*100):0;
+  return <div>
+    <button onClick={onBack} className="mb-2 text-sm text-primary hover:underline">← Retour aux thèmes</button>
+    <div className="mb-4 flex items-center gap-2">
+      <h2 className="text-xl font-semibold text-primary">{data.title}</h2>
+      <Badge variant="secondary">{data.qs.length} questions</Badge>
+    </div>
+    <div className="space-y-4">
+      {data.qs.map((q,i)=>{
+        const ok=isOk(q,i);
+        return <Card key={i} className="p-4">
+          <div className="mb-2 flex items-start gap-2">
+            <Badge variant="secondary" className="mt-0.5">Q{i+1}</Badge>
+            <div>
+              <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{TYPE_LABEL[q.type]}</div>
+              <div className="qhtml font-medium"><Html html={q.q}/></div>
+            </div>
+          </div>
+          {(q.type==='qcm')&&<div className="mt-2 space-y-2">
+            {q.o.map((o,j)=>{
+              const sel=ans[i]===j; const showC=checked&&j===q.a; const showW=checked&&sel&&j!==q.a;
+              return <label key={j} className={cn('flex cursor-pointer items-center gap-3 rounded-md border p-2.5 transition-colors',
+                showC?'border-emerald-500 bg-emerald-500/10':showW?'border-red-500 bg-red-500/10':'border-border bg-secondary/40 hover:border-primary')}>
+                <input type="radio" name={'q'+i} checked={sel} onChange={()=>setOne(i,j)} className="accent-sky-500"/>
+                <Html html={o}/></label>;})}
+          </div>}
+          {(q.type==='multi')&&<div className="mt-2 space-y-2">
+            {q.o.map((o,j)=>{const sel=(ans[i]||[]).includes(j);const isC=q.a.includes(j);
+              const showC=checked&&isC; const showW=checked&&sel&&!isC;
+              return <label key={j} className={cn('flex cursor-pointer items-center gap-3 rounded-md border p-2.5 transition-colors',
+                showC?'border-emerald-500 bg-emerald-500/10':showW?'border-red-500 bg-red-500/10':'border-border bg-secondary/40 hover:border-primary')}>
+                <input type="checkbox" checked={sel} onChange={()=>toggle(i,j)} className="accent-sky-500"/>
+                <Html html={o}/></label>;})}
+          </div>}
+          {(q.type==='vf')&&<div className="mt-2 space-y-2">
+            {[['true','Vrai'],['false','Faux']].map(([val,lab])=>{
+              const sel=ans[i]===val; const correctVal=q.a?'true':'false';
+              const showC=checked&&val===correctVal; const showW=checked&&sel&&val!==correctVal;
+              return <label key={val} className={cn('flex cursor-pointer items-center gap-3 rounded-md border p-2.5 transition-colors',
+                showC?'border-emerald-500 bg-emerald-500/10':showW?'border-red-500 bg-red-500/10':'border-border bg-secondary/40 hover:border-primary')}>
+                <input type="radio" name={'q'+i} checked={sel} onChange={()=>setOne(i,val)} className="accent-sky-500"/>{lab}</label>;})}
+          </div>}
+          {(q.type==='short')&&<div className="mt-2">
+            <textarea placeholder="Rédige ta réponse..." className="min-h-[70px] w-full resize-y rounded-md border border-input bg-secondary/40 p-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"/>
+          </div>}
+          {checked&&<Alert tone={q.type==='short'?'info':(ok?'good':'bad')} className="corr mt-3">
+            {q.type==='short'
+              ? <span><b className="text-emerald-400">Réponse modèle :</b> {q.a}<div className="mt-1 text-muted-foreground"><Html html={q.e}/></div></span>
+              : <span><b className={ok?'text-emerald-400':'text-red-400'}>{ok?'✓ Correct. ':'✗ Revois. '}</b><Html html={q.e}/></span>}
+          </Alert>}
+        </Card>;})}
+    </div>
+    {checked&&<Card className="mt-4 p-4 text-center">
+      <div className="text-lg font-bold" style={{color:pct>=80?'#34d399':pct>=50?'#fbbf24':'#f87171'}}>Score QCM / VF : {score}/{gradable} — {pct}%</div>
+      <Progress value={pct} className="mt-3"/>
+      <div className="mt-2 text-sm text-muted-foreground">{pct>=80?'Maîtrisé 🎉 Passe au thème suivant.':'Refais cette série jusqu’à ≥ 80 %. Les questions-réponses sont à corriger toi-même.'}</div>
+    </Card>}
+    <div className="sticky bottom-0 mt-5 flex gap-3 bg-gradient-to-t from-background to-transparent py-3">
+      <Button onClick={()=>{setChecked(true);}}>✓ Corriger</Button>
+      <Button variant="secondary" onClick={()=>{setAns({});setChecked(false);window.scrollTo({top:0,behavior:'smooth'});}}>↻ Recommencer</Button>
+    </div>
+  </div>;
+}
+function QuizView({quizKey,setQuizKey}){
+  return quizKey ? <QuizRunner bankKey={quizKey} onBack={()=>setQuizKey(null)}/> : <QuizHome onPick={setQuizKey}/>;
+}
+
+/* ---- Exercices ---- */
+function ExoItem({e,open,onToggle}){
+  return <Card className="overflow-hidden">
+    <button onClick={onToggle} className="flex w-full items-center gap-3 p-4 text-left hover:bg-accent/40">
+      <Badge variant="secondary" className="shrink-0">{e.cat}</Badge>
+      <span className="flex-1 font-medium">{e.titre}</span>
+      <span className="hidden shrink-0 text-xs text-muted-foreground sm:inline">{e.diff}</span>
+      <span className={cn('shrink-0 transition-transform', open&&'rotate-180')}>▾</span>
+    </button>
+    <div className="px-4 pb-2 corr text-sm"><Html html={e.enonce}/></div>
+    {open&&<div className="border-t border-border px-4 py-3">
+      <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-emerald-400">Corrigé</div>
+      <div className="corr text-sm"><Html html={e.corrige}/></div>
+    </div>}
+  </Card>;
+}
+function ExoView(){
+  const cats=useMemo(()=>['Tous',...Array.from(new Set(EXOS.map(e=>e.cat)))],[]);
+  const [filter,setFilter]=useState('Tous');
+  const [open,setOpen]=useState(null);
+  const list=EXOS.map((e,i)=>({e,i})).filter(x=>filter==='Tous'||x.e.cat===filter);
+  return <div>
+    <h2 className="mb-2 text-xl font-semibold text-primary">Exercices type-examen (à rédiger)</h2>
+    <p className="mb-4 text-sm text-muted-foreground">{EXOS.length} sujets ouverts sur 3 niveaux (Facile / Moyen / Difficile), couvrant chaque aspect. Rédige ta réponse sur brouillon avant d'ouvrir le corrigé.</p>
+    <div className="mb-4 flex flex-wrap gap-2">
+      {cats.map(c=><button key={c} onClick={()=>{setFilter(c);setOpen(null);}}
+        className={cn('rounded-full border px-3.5 py-1 text-xs font-medium transition-colors',
+          filter===c?'border-transparent bg-primary text-primary-foreground':'border-border text-muted-foreground hover:bg-accent')}>{c}</button>)}
+    </div>
+    <div className="space-y-3">
+      {list.map(({e,i})=><ExoItem key={i} e={e} open={open===i} onToggle={()=>setOpen(open===i?null:i)}/>)}
+    </div></div>;
+}
+
+/* ---- Sections statiques (réutilise le contenu HTML existant) ---- */
+function LegacySection({id}){
+  const html=useMemo(()=>{const el=document.getElementById(id);if(!el)return '';
+    const c=el.cloneNode(true);const h=c.querySelector('h2');if(h)h.remove();return c.innerHTML;},[id]);
+  const titles={fiches:'⚡ Fiches express',method:'🧠 Méthode',liens:'🔗 Ressources'};
+  return <div>
+    <h2 className="mb-4 text-xl font-semibold text-primary">{titles[id]}</h2>
+    <Card><CardContent className="prose-inject pt-5"><div dangerouslySetInnerHTML={{__html:html}}/></CardContent></Card>
+  </div>;
+}
+
+/* ---- App ---- */
+function App(){
+  const [tab,setTab]=useState('plan');
+  const [quizKey,setQuizKey]=useState(null);
+  const [exam,setExam]=useState(()=>{try{return localStorage.getItem('sil_exam')||defaultExam();}catch(e){return defaultExam();}});
+  useEffect(()=>{try{localStorage.setItem('sil_exam',exam);}catch(e){}},[exam]);
+  const revise=(k)=>{setQuizKey(k);setTab('quiz');window.scrollTo({top:0,behavior:'smooth'});};
+  return <div className="min-h-screen text-foreground">
+    <Header exam={exam} setExam={setExam}/>
+    <TabsBar active={tab} onChange={setTab}/>
+    <main className="mx-auto max-w-4xl px-4 pb-24">
+      {tab==='plan'&&<PlanView onRevise={revise} exam={exam}/>}
+      {tab==='quiz'&&<QuizView quizKey={quizKey} setQuizKey={setQuizKey}/>}
+      {tab==='exos'&&<ExoView/>}
+      {tab==='fiches'&&<LegacySection id="fiches"/>}
+      {tab==='method'&&<LegacySection id="method"/>}
+      {tab==='liens'&&<LegacySection id="liens"/>}
+    </main>
+    <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">Prépa SIL · interface shadcn/ui · refais chaque série jusqu'à la maîtrise 💪</footer>
+  </div>;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+})();
+</script>
+
+<!-- Secours : si React/Tailwind ne se chargent pas (hors-ligne), on réaffiche l'ancienne interface -->
+<script>
+window.addEventListener('load',function(){setTimeout(function(){
+  var r=document.getElementById('root');
+  if(!window.React || !r || r.childNodes.length===0){
+    var s=document.getElementById('hideLegacy'); if(s) s.remove();
+  }
+},1800);});
+</script>
+</body>
+</html>
