@@ -91,6 +91,12 @@ progression restant alors locale au navigateur.
      de redirection : `http://localhost:3000/api/auth/callback/facebook`.
      Facebook impose HTTPS hors `localhost`.
 5. `npm run db:push` pour créer les tables sur la base Postgres.
+   ⚠️ La CLI Prisma ne lit **que** `.env` par défaut, jamais `.env.local` — le
+   script passe donc par `dotenv-cli` (`db:push` et `db:studio` dans
+   `package.json`) pour forcer la lecture de `.env.local`. Appeler `prisma`
+   directement (`npx prisma db push`) sans ce détour échoue avec
+   « DATABASE_URL resolved to an empty string », même si la variable est bien
+   présente dans `.env.local`.
 6. `npm run dev`, puis « Se connecter » dans la barre supérieure.
 
 En production auto-hébergée, renseigner en plus `AUTH_URL` (ou
@@ -137,12 +143,24 @@ Deux façons équivalentes d'obtenir un `DATABASE_URL` :
 - **Depuis [neon.tech](https://neon.tech)** directement : créer un projet,
   copier la chaîne de connexion (`postgresql://...`).
 
+Si la base est créée depuis le tableau de bord Vercel, `DATABASE_URL`
+n'existe qu'**en tant que variable d'environnement Vercel** — pas dans le
+projet en local. Pour créer les tables (étape suivante), copier cette valeur
+depuis **Settings → Environment Variables** vers `.env.local`.
+
 ### 2. Créer les tables
 
 ```bash
 # Coller le DATABASE_URL obtenu dans .env.local, puis :
 npm run db:push
 ```
+
+C'est la base pointée par ce `DATABASE_URL` qui doit contenir les tables —
+celle que Vercel utilisera en production. Pousser le schéma vers une autre
+base (ex. une base locale ou une base Neon créée « à côté ») laisse la base
+de production sans tables : Auth.js échoue alors à l'étape de callback OAuth
+avec l'erreur générique « La configuration de l'authentification est
+incomplète côté serveur ».
 
 ### 3. Pousser le code sur GitHub
 
