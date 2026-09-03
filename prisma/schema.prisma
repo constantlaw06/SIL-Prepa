@@ -1,12 +1,13 @@
-// Base locale SQLite. Pour un déploiement, remplacer provider par "postgresql"
-// et pointer DATABASE_URL sur la base hébergée : le reste du schéma est portable.
+// Postgres, requis en production (Vercel n'a pas de disque persistant pour
+// SQLite). DATABASE_URL pointe vers la base hébergée (ex. Neon) en local
+// comme en production ; voir README > Déploiement.
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

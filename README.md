@@ -13,8 +13,12 @@ npm run dev              # http://localhost:3000
 npm run build            # build de production (pages pré-générées)
 npm run lint
 npm run verify:content   # parité des contenus avec le document d'origine
-npm run db:push          # crée la base locale (comptes et progression)
+npm run db:push          # crée les tables (comptes et progression)
 ```
+
+La base de données est Postgres, y compris en local : voir la section
+[Comptes](#comptes-google--facebook) pour la mise en route et
+[Déploiement](#déploiement-vercel) pour la mise en production.
 
 La date d'examen par défaut est le **29 septembre 2026**
 (`DEFAULT_EXAM_DATE` dans `src/lib/exam-date.ts`). Elle se change dans la barre
@@ -67,17 +71,27 @@ progression restant alors locale au navigateur.
 ### Mise en route
 
 1. `cp .env.example .env.local`
-2. `npx auth secret` pour générer `AUTH_SECRET`.
-3. Créer les identifiants OAuth chez le ou les fournisseurs voulus. Un seul
-   suffit : la page de connexion n'affiche que ceux qui sont configurés.
-   - **Google** : Google Cloud Console > API et services > Identifiants > ID
-     client OAuth 2.0, type « Application Web ». URI de redirection autorisée :
+2. Créer une base Postgres gratuite sur [neon.tech](https://neon.tech) (ou via
+   Vercel, voir Déploiement) et coller la chaîne de connexion dans
+   `DATABASE_URL`.
+3. Générer `AUTH_SECRET` : `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`
+   et le coller dans `.env.local`.
+   ⚠️ `npx auth secret`, documenté par Auth.js, installe en pratique le
+   paquet npm `auth` d'un projet tiers (« Better Auth ») et produit une
+   variable `BETTER_AUTH_SECRET` sans rapport — ne pas l'utiliser ici.
+4. Créer les identifiants OAuth chez le ou les fournisseurs voulus. Un seul
+   suffit : la page de connexion n'affiche que ceux qui sont configurés. Le
+   menu **API et services → Identifiants** de Google s'appelle maintenant
+   **Google Auth Platform** (renommé par Google en 2024) ; il n'apparaît que
+   si au moins une API est activée sur le projet.
+   - **Google** : Google Auth Platform > Clients > Créer un client, type
+     « Application Web ». URI de redirection autorisée :
      `http://localhost:3000/api/auth/callback/google`.
    - **Facebook** : Meta for Developers > application > Connexion Facebook. URI
      de redirection : `http://localhost:3000/api/auth/callback/facebook`.
      Facebook impose HTTPS hors `localhost`.
-4. `npm run db:push` pour créer la base SQLite locale (`prisma/dev.db`).
-5. `npm run dev`, puis « Se connecter » dans la barre supérieure.
+5. `npm run db:push` pour créer les tables sur la base Postgres.
+6. `npm run dev`, puis « Se connecter » dans la barre supérieure.
 
 En production auto-hébergée, renseigner en plus `AUTH_URL` (ou
 `AUTH_TRUST_HOST`), sans quoi Auth.js refuse les requêtes avec
@@ -103,9 +117,102 @@ fournisseur.
 
 ### Base de données
 
-SQLite en local (`prisma/schema.prisma`). Pour un déploiement, passer le
-`provider` du bloc `datasource` à `postgresql` et faire pointer `DATABASE_URL`
-sur la base hébergée : les modèles sont portables tels quels.
+Postgres (`prisma/schema.prisma`), en local comme en production : voir la
+section Déploiement ci-dessous pour créer la base et renseigner
+`DATABASE_URL`.
+
+## Déploiement (Vercel)
+
+Vercel n'a pas de disque persistant, ce qui exclut SQLite : la base de
+données doit être une Postgres hébergée. [Neon](https://neon.tech) a un plan
+gratuit qui suffit pour ce projet, et s'intègre nativement à Vercel.
+
+### 1. Créer la base Postgres
+
+Deux façons équivalentes d'obtenir un `DATABASE_URL` :
+
+- **Depuis le tableau de bord Vercel** (le plus simple) : dans le projet,
+  onglet **Storage → Create Database → Postgres (Neon)**. Vercel écrit alors
+  `DATABASE_URL` directement dans les variables d'environnement du projet.
+- **Depuis [neon.tech](https://neon.tech)** directement : créer un projet,
+  copier la chaîne de connexion (`postgresql://...`).
+
+### 2. Créer les tables
+
+```bash
+# Coller le DATABASE_URL obtenu dans .env.local, puis :
+npm run db:push
+```
+
+### 3. Pousser le code sur GitHub
+
+```bash
+git add -A
+git commit -m "message"
+git push
+```
+
+### 4. Importer le projet dans Vercel
+
+Sur [vercel.com/new](https://vercel.com/new), importer le dépôt GitHub.
+Vercel détecte Next.js automatiquement (build : `next build`, déjà correct
+dans `package.json`).
+
+### 5. Variables d'environnement (Settings → Environment Variables)
+
+| Variable | Valeur |
+|---|---|
+| `DATABASE_URL` | déjà présente si créée via Storage à l'étape 1, sinon à ajouter |
+| `AUTH_SECRET` | la même valeur que `.env.local`, ou en régénérer une avec `openssl rand -base64 32` |
+| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | ceux de la Google Cloud Console |
+| `AUTH_FACEBOOK_ID` / `AUTH_FACEBOOK_SECRET` | si utilisé |
+| `AUTH_URL` | `https://prepa-sil.constantdansou.me` (à ajouter après l'étape 7) |
+
+Auth.js détecte automatiquement qu'il tourne sur Vercel (`AUTH_TRUST_HOST` est
+inféré), mais `AUTH_URL` reste recommandé pour un domaine personnalisé.
+
+### 6. Déployer
+
+Cliquer sur **Deploy**. Vercel donne d'abord une URL `*.vercel.app` : vérifier
+que le site fonctionne avant de brancher le domaine personnalisé.
+
+### 7. Brancher prepa-sil.constantdansou.me
+
+1. Dans le projet Vercel : **Settings → Domains → Add**, saisir
+   `prepa-sil.constantdansou.me`.
+2. Vercel affiche un enregistrement à créer, du type :
+
+   | Type | Nom | Valeur |
+   |---|---|---|
+   | CNAME | `prepa-sil` | `cname.vercel-dns.com.` |
+
+   (la valeur exacte est donnée par Vercel — la copier telle quelle, point
+   final inclus.)
+3. Ajouter cet enregistrement chez le fournisseur DNS qui gère
+   `constantdansou.me`. Propagation : quelques minutes en général, jusqu'à
+   72 h dans le pire cas.
+4. Vercel valide automatiquement dès que le DNS répond (« Valid
+   Configuration » dans le tableau de bord).
+5. Ajouter `AUTH_URL=https://prepa-sil.constantdansou.me` dans les variables
+   d'environnement (étape 5), puis redéployer (**Deployments → ⋯ →
+   Redeploy**).
+
+### 8. Mettre à jour les identifiants OAuth
+
+Le domaine ayant changé, retourner dans la console de chaque fournisseur et
+ajouter les URI du domaine final, **en plus** de celles de `localhost` :
+
+- **Google** : Origine JavaScript `https://prepa-sil.constantdansou.me` et
+  URI de redirection `https://prepa-sil.constantdansou.me/api/auth/callback/google`.
+- **Facebook** : URI de redirection
+  `https://prepa-sil.constantdansou.me/api/auth/callback/facebook`.
+
+### 9. Vérifier
+
+- `https://prepa-sil.constantdansou.me` charge le tableau de bord.
+- `/connexion` propose bien le bouton Google et la connexion aboutit.
+- Une série de quiz corrigée reste visible après rechargement (persistance en
+  base).
 
 ## Structure
 
