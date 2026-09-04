@@ -23,6 +23,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   results       QuizResult[]
+  exercises     ExerciseResult[]
 }
 
 model Account {
@@ -76,5 +77,20 @@ model QuizResult {
   // Une série est identifiée par son thème et son horodatage : rejouer une
   // synchronisation ne crée donc pas de doublon.
   @@unique([userId, theme, at])
+  @@index([userId])
+}
+
+// --- Exercices rédigés (auto-évaluation) ---
+
+model ExerciseResult {
+  id      String   @id @default(cuid())
+  userId  String
+  /// Index de l'exercice dans src/data/exos.ts.
+  index   Int
+  correct Boolean
+  at      DateTime
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, index])
   @@index([userId])
 }

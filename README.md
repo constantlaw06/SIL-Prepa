@@ -48,8 +48,12 @@ combien de jours le plan démarre.
   affichée neutre, jamais en vert par défaut, pour ne pas laisser croire à
   une bonne réponse. Un « Non » alimente le carnet d'erreurs comme une
   question notée ratée.
-- **Exercices** (`/exercices`) - 38 sujets type-examen filtrables par catégorie,
-  chaque corrigé se dépliant à la demande.
+- **Exercices** (`/exercices`) - 38 sujets type-examen filtrables par
+  catégorie et difficulté. Chaque exercice se rédige dans un brouillon avant
+  d'afficher le corrigé, puis se soumet à une auto-évaluation (« As-tu
+  répondu correctement ? », même mécanisme que les questions ouvertes) qui
+  alimente une note globale (% de bonnes réponses parmi les exercices
+  tentés) affichée en tête de page.
 - **Fiches** (`/fiches`), **Méthode** (`/methode`), **Ressources**
   (`/ressources`) - contenus de révision statiques.
 
@@ -86,6 +90,9 @@ dernières séries. C'est la seule source des chiffres du tableau de bord, qui
 affiche un état vide tant qu'aucune série n'a été corrigée. Le store vit dans
 `src/lib/results-store.ts` et se lit via `useSyncExternalStore`, comme la date
 d'examen (`src/lib/exam-store.ts`).
+
+L'auto-évaluation des exercices suit le même principe (localStorage `sil_exercises`,
+`src/lib/exercise-store.ts`), indépendamment de la progression des quiz.
 
 Sans compte, la progression ne quitte pas le navigateur. Avec un compte, elle
 est aussi écrite en base et suit l'utilisateur d'un appareil à l'autre.
@@ -135,10 +142,11 @@ fournisseur.
 
 - Auth.js v5 avec l'adaptateur Prisma, sessions **en base** donc révocables
   côté serveur. Configuration dans `src/auth.ts`.
-- À la connexion, les séries déjà enregistrées dans le navigateur sont envoyées
-  au compte, puis la progression fusionnée redescend
-  (`src/components/auth/progress-sync.tsx`). Une série est identifiée par son
-  thème et son horodatage : synchroniser deux fois ne crée pas de doublon.
+- À la connexion, les séries de quiz et les auto-évaluations d'exercices
+  déjà enregistrées dans le navigateur sont envoyées au compte, puis la
+  version fusionnée redescend (`src/components/auth/progress-sync.tsx`). Une
+  série est identifiée par son thème et son horodatage, un exercice par son
+  index : synchroniser deux fois ne crée pas de doublon.
 - L'API `/api/progress` valide chaque entrée reçue, plafonne l'historique à 30
   séries par compte et ne renvoie jamais que les données du compte appelant.
 - La liaison de comptes par e-mail est **désactivée** (défaut d'Auth.js) : la

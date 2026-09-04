@@ -13,9 +13,16 @@ import { useMemo, useState } from "react";
 import { RichText } from "@/components/rich-text";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Progress } from "@/components/ui/progress";
+import { SelfAssessment } from "@/components/ui/self-assessment";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { Textarea } from "@/components/ui/textarea";
 import { EXOS } from "@/data/exos";
+import { useExerciseResults } from "@/hooks/use-exercise-results";
 import { LEVEL_CLASSES, LEVELS, exoMeta } from "@/lib/exo-meta";
 import type { Level } from "@/lib/exo-meta";
+import { recordExercise } from "@/lib/exercise-store";
+import type { ResourceState } from "@/lib/mastery";
 import type { Exo } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -29,16 +36,30 @@ function preview(html: string) {
   return text.length > 150 ? `${text.slice(0, 150)}…` : text;
 }
 
+/** Un exercice jamais tenté est « new », jamais « à reprendre » par défaut. */
+function stateOf(correct: boolean | undefined): ResourceState {
+  if (correct === undefined) return "new";
+  return correct ? "mastered" : "review";
+}
+
 function ExoCard({
   exo,
+  index,
   open,
   onToggle,
+  correct,
+  onSelfAssess,
 }: {
   exo: Exo;
+  index: number;
   open: boolean;
   onToggle: () => void;
+  correct: boolean | undefined;
+  onSelfAssess: (value: boolean) => void;
 }) {
   const { duration, level } = exoMeta(exo);
+  const [showCorrige, setShowCorrige] = useState(false);
+  const [draft, setDraft] = useState("");
 
   return (
     <article className="rounded-lg border border-border bg-card p-4">
@@ -62,6 +83,7 @@ function ExoCard({
             {duration}
           </span>
         )}
+        <StatusBadge state={stateOf(correct)} className="ml-auto shrink-0" />
       </div>
 
       <h3 className="mt-2 font-semibold">{exo.titre}</h3>
@@ -97,16 +119,45 @@ function ExoCard({
           </h4>
           <RichText html={exo.enonce} className="mt-1.5 text-sm" />
 
-          <details className="group mt-4 rounded-md border border-border bg-secondary/30 p-3">
-            <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-success">
-              <EyeIcon aria-hidden="true" className="size-4" />
-              Afficher le corrigé
-              <span className="ml-auto text-xs font-normal text-muted-foreground">
-                rédige d&apos;abord ta réponse
-              </span>
-            </summary>
-            <RichText html={exo.corrige} className="mt-3 text-sm" />
-          </details>
+          <div className="mt-4">
+            <label
+              htmlFor={`exo-${index}`}
+              className="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+            >
+              Ta réponse
+            </label>
+            <Textarea
+              id={`exo-${index}`}
+              placeholder="Rédige ta réponse ici avant de consulter le corrigé..."
+              className="mt-1.5 min-h-24 resize-y bg-secondary/40"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+            />
+          </div>
+
+          {!showCorrige ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowCorrige(true)}
+              className="mt-3"
+            >
+              <EyeIcon aria-hidden="true" />
+              Voir le corrigé et me noter
+            </Button>
+          ) : (
+            <div className="mt-4 rounded-md border border-border bg-secondary/30 p-3">
+              <h4 className="text-xs font-semibold tracking-wide text-success uppercase">
+                Corrigé
+              </h4>
+              <RichText html={exo.corrige} className="mt-2 text-sm" />
+              <SelfAssessment
+                value={correct ?? null}
+                onChange={onSelfAssess}
+                className="mt-4 border-t border-border pt-3"
+              />
+            </div>
+          )}
         </div>
       )}
     </article>
@@ -114,6 +165,8 @@ function ExoCard({
 }
 
 export function ExoList() {
+  const { results, ready } = useExerciseResults();
+
   const categories = useMemo(
     () => Array.from(new Set(EXOS.map((e) => e.cat))).sort(),
     [],
@@ -131,6 +184,10 @@ export function ExoList() {
 
   const activeCount = (cat ? 1 : 0) + (level ? 1 : 0);
 
+  const attempted = Object.values(results.byIndex);
+  const correctCount = attempted.filter((r) => r.correct).length;
+  const pct = attempted.length ? Math.round((correctCount / attempted.length) * 100) : null;
+
   const reset = () => {
     setCat(null);
     setLevel(null);
@@ -144,6 +201,24 @@ export function ExoList() {
         brouillon avant d&apos;ouvrir le corrigé : c&apos;est la rédaction qui est
         notée le jour J.
       </p>
+
+      {/* Note globale : uniquement une fois qu'au moins un exercice est tenté. */}
+      {ready && attempted.length > 0 && (
+        <div className="rounded-lg border border-border bg-card p-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <span className="text-sm font-medium">Ta note sur les exercices tentés</span>
+            <span className="text-2xl font-bold tabular-nums">{pct} %</span>
+          </div>
+          <Progress value={pct ?? 0} className="mt-2" />
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            {correctCount}/{attempted.length} correct{correctCount > 1 ? "s" : ""} sur{" "}
+            {attempted.length} tenté{attempted.length > 1 ? "s" : ""} · {EXOS.length - attempted.length}{" "}
+            restant{EXOS.length - attempted.length !== 1 ? "s" : ""} sur {EXOS.length}. Cette
+            note vient de ton auto-évaluation contre le corrigé, pas d&apos;une correction
+            automatique.
+          </p>
+        </div>
+      )}
 
       {/* Filtres : repliés par défaut sur mobile, toujours visibles au-delà */}
       <div className="rounded-lg border border-border bg-card">
@@ -225,8 +300,11 @@ export function ExoList() {
             <ExoCard
               key={i}
               exo={exo}
+              index={i}
               open={open === i}
               onToggle={() => setOpen(open === i ? null : i)}
+              correct={results.byIndex[i]?.correct}
+              onSelfAssess={(value) => recordExercise(i, value)}
             />
           ))}
         </div>

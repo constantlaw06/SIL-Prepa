@@ -6,6 +6,7 @@ import { RichText } from "@/components/rich-text";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { SelfAssessment } from "@/components/ui/self-assessment";
 import { Textarea } from "@/components/ui/textarea";
 import { TYPE_LABEL, isCorrect } from "@/lib/quiz";
 import type { Answer, Question } from "@/lib/types";
@@ -54,56 +55,6 @@ function Option({
       />
       {children}
     </label>
-  );
-}
-
-/**
- * Une question ouverte n'a pas de correction automatique fiable (texte
- * libre) : l'étudiant doit se corriger lui-même contre la réponse modèle.
- * Tant qu'il ne l'a pas fait, aucune couleur de succès ne doit apparaître -
- * sinon l'interface laisse croire à une bonne réponse par défaut.
- */
-function SelfAssessment({
-  selfAssessed,
-  onSelfAssess,
-}: {
-  selfAssessed: boolean | null;
-  onSelfAssess: (correct: boolean) => void;
-}) {
-  return (
-    <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
-      <span className="text-xs font-medium text-muted-foreground">
-        As-tu répondu correctement ?
-      </span>
-      <button
-        type="button"
-        onClick={() => onSelfAssess(true)}
-        aria-pressed={selfAssessed === true}
-        className={cn(
-          "flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors",
-          selfAssessed === true
-            ? "border-success bg-success/10 text-success"
-            : "border-border text-muted-foreground hover:border-success/50 hover:text-success",
-        )}
-      >
-        <CheckCircleIcon aria-hidden="true" className="size-3.5" />
-        Oui, c&apos;était juste
-      </button>
-      <button
-        type="button"
-        onClick={() => onSelfAssess(false)}
-        aria-pressed={selfAssessed === false}
-        className={cn(
-          "flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors",
-          selfAssessed === false
-            ? "border-destructive bg-destructive/10 text-destructive"
-            : "border-border text-muted-foreground hover:border-destructive/50 hover:text-destructive",
-        )}
-      >
-        <XCircleIcon aria-hidden="true" className="size-3.5" />
-        Non, à revoir
-      </button>
-    </div>
   );
 }
 
@@ -254,8 +205,9 @@ export function QuestionCard({
                 />
                 {onSelfAssess && (
                   <SelfAssessment
-                    selfAssessed={selfAssessed}
-                    onSelfAssess={onSelfAssess}
+                    value={selfAssessed}
+                    onChange={onSelfAssess}
+                    className="mt-3 border-t border-border pt-3"
                   />
                 )}
               </div>
