@@ -15,13 +15,23 @@ async function currentUserId() {
   return session?.user?.id ?? null;
 }
 
-function toPayload(rows: { theme: string; score: number; gradable: number; pct: number; at: Date }[]) {
+function toPayload(
+  rows: {
+    theme: string;
+    score: number;
+    gradable: number;
+    pct: number;
+    at: Date;
+    wrong: number[];
+  }[],
+) {
   return rows.map((r) => ({
     theme: r.theme,
     score: r.score,
     gradable: r.gradable,
     pct: r.pct,
     at: r.at.toISOString(),
+    wrong: r.wrong,
   }));
 }
 
@@ -44,12 +54,21 @@ function sanitize(input: unknown): QuizResult[] {
     ) {
       continue;
     }
+    // Les index de questions ratees sont bornes : une entree hostile ne peut
+    // pas faire grossir la ligne indefiniment.
+    const wrong = Array.isArray(r.wrong)
+      ? r.wrong
+          .filter((n): n is number => typeof n === "number" && Number.isInteger(n) && n >= 0 && n < 200)
+          .slice(0, 200)
+      : [];
+
     out.push({
       theme: r.theme,
       score: Math.max(0, Math.round(r.score)),
       gradable: Math.max(0, Math.round(r.gradable)),
       pct: Math.min(100, Math.max(0, Math.round(r.pct))),
       at: at.toISOString(),
+      wrong,
     });
   }
   return out;
@@ -79,8 +98,13 @@ export async function POST(request: Request) {
       results.map((r) =>
         prisma.quizResult.upsert({
           where: { userId_theme_at: { userId, theme: r.theme, at: new Date(r.at) } },
-          create: { ...r, at: new Date(r.at), userId },
-          update: { score: r.score, gradable: r.gradable, pct: r.pct },
+          create: { ...r, wrong: r.wrong ?? [], at: new Date(r.at), userId },
+          update: {
+            score: r.score,
+            gradable: r.gradable,
+            pct: r.pct,
+            wrong: r.wrong ?? [],
+          },
         }),
       ),
     );

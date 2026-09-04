@@ -69,6 +69,8 @@ model QuizResult {
   gradable Int
   pct      Int
   at       DateTime
+  /// Index des questions ratees, pour le carnet d erreurs.
+  wrong    Int[]    @default([])
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Une série est identifiée par son thème et son horodatage : rejouer une

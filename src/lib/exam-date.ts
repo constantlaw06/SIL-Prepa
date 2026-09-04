@@ -42,3 +42,14 @@ export function themeOfTheDay(planDay: number | null) {
   if (planDay === null) return null;
   return PLAN.find((p) => p.d === planDay)?.k ?? null;
 }
+
+/** Date d'examen en toutes lettres : « 29 septembre 2026 ». */
+export function formatExamDate(examISO: string) {
+  const d = new Date(examISO + "T00:00:00");
+  if (Number.isNaN(d.getTime())) return "date invalide";
+  return d.toLocaleDateString("fr-FR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}

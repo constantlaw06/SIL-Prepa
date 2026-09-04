@@ -2,23 +2,24 @@
 
 import {
   AcademicCapIcon,
-  ArrowPathIcon,
+  ArrowRightIcon,
+  BookOpenIcon,
   CalendarDaysIcon,
   ChartBarIcon,
-  CheckBadgeIcon,
-  ChevronRightIcon,
-  ClipboardDocumentListIcon,
-  ClockIcon,
   ExclamationTriangleIcon,
+  LightBulbIcon,
+  LinkIcon,
   PuzzlePieceIcon,
-  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useMemo } from "react";
 
-import { AlertBanner } from "@/components/dashboard/alert-banner";
-import { KpiCard } from "@/components/dashboard/kpi-card";
+import { PriorityCard } from "@/components/dashboard/priority-card";
 import { ScoreChart } from "@/components/dashboard/score-chart";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Progress } from "@/components/ui/progress";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { BANK } from "@/data/bank";
 import { EXOS } from "@/data/exos";
 import { PLAN, PLAN_LEN } from "@/data/plan";
@@ -28,54 +29,38 @@ import {
   currentPlanDay,
   daysBeforePlanStart,
   daysLeft,
+  formatExamDate,
   themeOfTheDay,
 } from "@/lib/exam-date";
+import { MASTERY_TARGET, globalProgress, recommend } from "@/lib/mastery";
 import { cn } from "@/lib/utils";
 
-const QUESTION_TOTAL = Object.values(BANK).reduce((n, t) => n + t.qs.length, 0);
-
-function scoreTone(pct: number) {
-  if (pct >= 80) return "text-success";
-  if (pct >= 50) return "text-warning";
-  return "text-destructive";
-}
-
-function Panel({
-  title,
-  action,
-  badge,
-  children,
-  className,
+/** Une statistique du bandeau « où j'en suis », toujours explicitée. */
+function Stat({
+  value,
+  label,
+  hint,
 }: {
-  title: string;
-  action?: { href: string; label: string };
-  badge?: string;
-  children: React.ReactNode;
-  className?: string;
+  value: string;
+  label: string;
+  hint?: string;
 }) {
   return (
-    <section className={cn("rounded-lg border border-border bg-card p-4", className)}>
-      <div className="mb-4 flex items-center gap-2">
-        <h2 className="flex-1 text-base font-semibold">{title}</h2>
-        {badge && (
-          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-muted-foreground">
-            {badge}
-          </span>
-        )}
-        {action && (
-          <Link
-            href={action.href}
-            className="flex items-center gap-0.5 text-xs font-medium text-primary hover:underline"
-          >
-            {action.label}
-            <ChevronRightIcon aria-hidden="true" className="size-3.5" />
-          </Link>
-        )}
-      </div>
-      {children}
-    </section>
+    <div className="rounded-lg border border-border bg-card p-3.5">
+      <div className="text-2xl font-bold tabular-nums">{value}</div>
+      <div className="mt-0.5 text-sm">{label}</div>
+      {hint && <div className="mt-0.5 text-xs text-muted-foreground">{hint}</div>}
+    </div>
   );
 }
+
+const SECONDARY_LINKS = [
+  { href: "/plan", label: "Plan de révision", icon: CalendarDaysIcon },
+  { href: "/exercices", label: "Exercices rédigés", icon: PuzzlePieceIcon },
+  { href: "/fiches", label: "Fiches express", icon: BookOpenIcon },
+  { href: "/methode", label: "Méthode", icon: LightBulbIcon },
+  { href: "/ressources", label: "Ressources", icon: LinkIcon },
+];
 
 export function DashboardView() {
   const { exam, ready } = useExamDate();
@@ -83,38 +68,16 @@ export function DashboardView() {
 
   const left = daysLeft(exam);
   const planDay = currentPlanDay(exam);
-  const dayTheme = themeOfTheDay(planDay);
-  const dayPlan = planDay ? PLAN.find((p) => p.d === planDay) : undefined;
   const beforeStart = daysBeforePlanStart(exam);
+  const dayPlan = planDay ? PLAN.find((p) => p.d === planDay) : undefined;
 
-  const planSub = planDay
-    ? `Jour ${planDay} sur ${PLAN_LEN}`
-    : beforeStart > 0
-      ? `Le plan démarre dans ${beforeStart} jour${beforeStart > 1 ? "s" : ""}`
-      : "Plan terminé";
+  const progress = useMemo(() => globalProgress(BANK, results), [results]);
+  const recommendation = useMemo(
+    () => recommend(progress, themeOfTheDay(planDay)),
+    [progress, planDay],
+  );
 
-  const themes = Object.entries(BANK).map(([key, theme]) => ({
-    key,
-    title: theme.title,
-    count: theme.qs.length,
-    result: results.last[key] ?? null,
-  }));
-
-  const attempted = themes.filter((t) => t.result);
-  const mastered = attempted.filter((t) => t.result!.pct >= 80);
-  const weak = attempted.filter((t) => t.result!.pct < 50);
-  const never = themes.filter((t) => !t.result);
-  const avg = attempted.length
-    ? Math.round(attempted.reduce((n, t) => n + t.result!.pct, 0) / attempted.length)
-    : null;
-
-  const { history } = results;
-  const trend =
-    history.length >= 2
-      ? history[history.length - 1].pct - history[history.length - 2].pct
-      : null;
-
-  const chartPoints = history.slice(-10).map((h) => ({
+  const chartPoints = results.history.slice(-10).map((h) => ({
     label: new Date(h.at).toLocaleDateString("fr-FR", {
       day: "2-digit",
       month: "2-digit",
@@ -122,255 +85,220 @@ export function DashboardView() {
     value: h.pct,
   }));
 
-  const questionsDone = attempted.reduce((n, t) => n + t.count, 0);
-
-  // File des séries à reprendre : les plus faibles d'abord, puis les inédites.
-  const todo = [
-    ...attempted
-      .filter((t) => t.result!.pct < 80)
-      .sort((a, b) => a.result!.pct - b.result!.pct),
-    ...never,
-  ].slice(0, 5);
-
-  const exoCats = Array.from(new Set(EXOS.map((e) => e.cat))).map((cat) => ({
-    cat,
-    count: EXOS.filter((e) => e.cat === cat).length,
-  }));
+  const globalPct = Math.round((progress.mastered / progress.total) * 100);
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <KpiCard
-          icon={CalendarDaysIcon}
-          label="Jours avant l'examen"
-          value={ready ? String(Math.max(0, left)) : "..."}
-          sub={ready ? planSub : "Chargement"}
-          tone={ready && left <= 7 ? "destructive" : "default"}
-        />
-        <KpiCard
-          icon={ClipboardDocumentListIcon}
-          label="Thèmes travaillés"
-          value={`${attempted.length}/${themes.length}`}
-          sub={`${questionsDone}/${QUESTION_TOTAL} questions couvertes`}
-        />
-        <KpiCard
-          icon={ChartBarIcon}
-          label="Score moyen"
-          value={avg === null ? "-" : `${avg}%`}
-          sub={avg === null ? "Aucune série corrigée" : "sur les derniers passages"}
-          trend={trend}
-          tone={avg === null ? "default" : avg >= 80 ? "success" : "warning"}
-        />
-        <KpiCard
-          icon={CheckBadgeIcon}
-          label="Thèmes maîtrisés"
-          value={`${mastered.length}/${themes.length}`}
-          sub="score supérieur ou égal à 80%"
-          tone={mastered.length > 0 ? "success" : "default"}
-        />
-        <KpiCard
-          icon={ArrowPathIcon}
-          label="Séries corrigées"
-          value={String(history.length)}
-          sub={`${EXOS.length} exercices disponibles`}
-        />
-      </div>
+    <div className="space-y-6">
+      {/* A. Situation actuelle */}
+      <section>
+        <h2 className="sr-only">Où j&apos;en suis</h2>
 
-      <div className="space-y-2">
-        {weak.length > 0 && (
-          <AlertBanner
-            tone="danger"
-            icon={ExclamationTriangleIcon}
-            action={{ href: `/quiz/${weak[0].key}`, label: "Refaire" }}
-          >
-            {weak.length} thème{weak.length > 1 ? "s" : ""} sous 50% :{" "}
-            {weak.map((t) => t.title).join(", ")}
-          </AlertBanner>
-        )}
+        <div className="mb-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <p className="text-lg font-semibold">
+            {ready ? (
+              left >= 0 ? (
+                <>
+                  Examen dans{" "}
+                  <span className={cn(left <= 7 && "text-destructive")}>
+                    {left} jour{left > 1 ? "s" : ""}
+                  </span>
+                </>
+              ) : (
+                "Date d'examen dépassée"
+              )
+            ) : (
+              "Chargement…"
+            )}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {ready && `${formatExamDate(exam)}`}
+            {ready && planDay && ` · jour ${planDay} du plan sur ${PLAN_LEN}`}
+            {ready && !planDay && beforeStart > 0 && ` · le plan démarre dans ${beforeStart} j`}
+          </p>
+        </div>
 
-        {ready && dayPlan && dayTheme && (
-          <AlertBanner
-            tone="warning"
-            icon={ClockIcon}
-            action={{ href: `/quiz/${dayTheme}`, label: "Réviser" }}
-          >
-            Programme du jour {planDay} : {dayPlan.t}
-          </AlertBanner>
-        )}
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <Stat
+            value={`${progress.started}/${progress.total}`}
+            label="thèmes commencés"
+            hint={
+              progress.started === 0 ? "aucun thème travaillé" : "sur le programme"
+            }
+          />
+          <Stat
+            value={`${progress.questionsAnswered}/${progress.questionsTotal}`}
+            label="questions couvertes"
+            hint="sur toute la banque"
+          />
+          <Stat
+            value={`${progress.mastered}/${progress.total}`}
+            label="thèmes maîtrisés"
+            hint={`score ≥ ${MASTERY_TARGET} %`}
+          />
+          <Stat
+            value={progress.averagePct === null ? "-" : `${progress.averagePct} %`}
+            label="score moyen"
+            hint={
+              progress.averagePct === null
+                ? "aucune série corrigée"
+                : "sur les thèmes travaillés"
+            }
+          />
+        </div>
 
-        {never.length > 0 && (
-          <AlertBanner
-            tone="info"
-            icon={SparklesIcon}
-            action={{ href: `/quiz/${never[0].key}`, label: "Commencer" }}
-          >
-            {never.length} thème{never.length > 1 ? "s" : ""} jamais tenté
-            {never.length > 1 ? "s" : ""} sur {themes.length}
-          </AlertBanner>
-        )}
-      </div>
+        <div className="mt-3">
+          <div className="mb-1.5 flex items-center justify-between text-xs text-muted-foreground">
+            <span>Progression globale (thèmes maîtrisés)</span>
+            <span className="tabular-nums">{globalPct} %</span>
+          </div>
+          <Progress value={globalPct} />
+        </div>
+      </section>
 
+      {/* B. Action prioritaire */}
+      <PriorityCard recommendation={recommendation} />
+
+      {ready && dayPlan && planDay && (
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md border border-border bg-secondary/40 px-3.5 py-2.5 text-sm">
+          <CalendarDaysIcon
+            aria-hidden="true"
+            className="size-4 shrink-0 text-muted-foreground"
+          />
+          <span className="text-muted-foreground">Au programme du jour {planDay} :</span>
+          <span className="font-medium">{dayPlan.t}</span>
+          <Link href="/plan" className="ml-auto text-primary hover:underline">
+            Voir le plan
+          </Link>
+        </p>
+      )}
+
+      {/* C + D. Faiblesses et progression */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <Panel
-          title="Progression des scores"
-          action={{ href: "/quiz", label: "Lancer une série" }}
-          className="xl:col-span-2"
-        >
-          {chartPoints.length > 0 && (
-            <div className="mb-3 flex flex-wrap items-center gap-4 text-xs">
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-chart-1" />
-                Score par série
-              </span>
-              <span className="flex items-center gap-1.5 text-muted-foreground">
-                <span className="h-px w-4 border-t-2 border-dashed border-success" />
-                Objectif 80%
-              </span>
-              <span className="text-muted-foreground">
-                {history.length} série{history.length > 1 ? "s" : ""} enregistrée
-                {history.length > 1 ? "s" : ""}
-              </span>
-            </div>
+        <section className="rounded-lg border border-border bg-card p-4 xl:col-span-2">
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <h2 className="text-base font-semibold">Progression des scores</h2>
+            <span className="text-xs text-muted-foreground">
+              {results.history.length} série
+              {results.history.length > 1 ? "s" : ""} corrigée
+              {results.history.length > 1 ? "s" : ""}
+            </span>
+          </div>
+          {chartPoints.length > 0 ? (
+            <ScoreChart points={chartPoints} />
+          ) : (
+            <EmptyState
+              icon={ChartBarIcon}
+              title="Tu n'as pas encore terminé de quiz"
+              description="Corrige une première série pour établir ton niveau de départ et voir ta courbe de progression."
+              action={{ href: "/quiz", label: "Commencer un quiz" }}
+            />
           )}
-          <ScoreChart points={chartPoints} />
-        </Panel>
+        </section>
 
-        <Panel title="À reprendre" badge={String(todo.length)}>
-          {todo.length === 0 ? (
+        <section className="rounded-lg border border-border bg-card p-4">
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <h2 className="text-base font-semibold">Mes points faibles</h2>
+            {progress.totalWrong > 0 && (
+              <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+                {progress.totalWrong} erreur{progress.totalWrong > 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+
+          {progress.weak.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Tous les thèmes sont au-dessus de 80%. Enchaîne sur les exercices
-              rédigés.
+              {progress.started === 0
+                ? "Tes points faibles apparaîtront ici dès ta première série corrigée."
+                : "Aucun thème sous l'objectif parmi ceux que tu as travaillés."}
             </p>
           ) : (
-            <ul className="space-y-2">
-              {todo.map((t) => (
-                <li key={t.key}>
-                  <Link
-                    href={`/quiz/${t.key}`}
-                    className="flex items-center gap-3 rounded-md border border-border bg-secondary/30 p-3 transition-colors hover:border-primary"
-                  >
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium">
-                        {t.title}
+            <>
+              <ul className="space-y-2">
+                {progress.weak.slice(0, 5).map((theme) => (
+                  <li key={theme.key}>
+                    <Link
+                      href={`/quiz/${theme.key}`}
+                      className="flex items-center gap-3 rounded-md border border-border bg-secondary/30 p-2.5 transition-colors hover:border-primary"
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium">
+                          {theme.title}
+                        </span>
+                        <span className="mt-1 block h-1.5 overflow-hidden rounded-full bg-secondary">
+                          <span
+                            className={cn(
+                              "block h-full rounded-full",
+                              (theme.pct ?? 0) < 50 ? "bg-destructive" : "bg-warning",
+                            )}
+                            style={{ width: `${theme.pct ?? 0}%` }}
+                          />
+                        </span>
                       </span>
-                      <span className="block text-xs text-muted-foreground">
-                        {t.count} questions
+                      <span className="shrink-0 text-sm font-semibold tabular-nums">
+                        {theme.pct} %
                       </span>
-                    </span>
-                    {t.result ? (
-                      <Badge
-                        variant="secondary"
-                        className={cn("shrink-0", scoreTone(t.result.pct))}
-                      >
-                        {t.result.pct}%
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="shrink-0">
-                        inédit
-                      </Badge>
-                    )}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <Button asChild variant="outline" size="sm" className="mt-3 w-full">
+                <Link href="/erreurs">
+                  <ExclamationTriangleIcon aria-hidden="true" />
+                  Revoir mes erreurs
+                </Link>
+              </Button>
+            </>
           )}
-          <Link
-            href="/plan"
-            className="mt-3 flex items-center gap-0.5 text-xs font-medium text-primary hover:underline"
-          >
-            Voir le plan complet
-            <ChevronRightIcon aria-hidden="true" className="size-3.5" />
-          </Link>
-        </Panel>
+        </section>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <Panel
-          title="Programme par thème"
-          action={{ href: "/quiz", label: "Tous les thèmes" }}
-          className="xl:col-span-2"
-        >
-          <ul className="space-y-2.5">
-            {themes.map((t) => {
-              const pct = t.result?.pct ?? 0;
-              return (
-                <li key={t.key} className="flex items-center gap-3">
-                  <Link
-                    href={`/quiz/${t.key}`}
-                    className="w-52 shrink-0 truncate text-sm hover:text-primary"
-                  >
-                    {t.title}
-                  </Link>
-                  <span className="h-2 flex-1 overflow-hidden rounded-full bg-secondary">
-                    <span
-                      className={cn(
-                        "block h-full rounded-full",
-                        pct >= 80
-                          ? "bg-success"
-                          : pct >= 50
-                            ? "bg-warning"
-                            : pct > 0
-                              ? "bg-destructive"
-                              : "bg-transparent",
-                      )}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </span>
-                  <span
-                    className={cn(
-                      "w-14 shrink-0 text-right text-xs tabular-nums",
-                      t.result ? scoreTone(pct) : "text-muted-foreground",
-                    )}
-                  >
-                    {t.result ? `${pct}%` : "-"}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </Panel>
-
-        <div className="space-y-4">
-          <Panel
-            title="Exercices rédigés"
-            action={{ href: "/exercices", label: "Ouvrir" }}
-          >
-            <ul className="space-y-2">
-              {exoCats.map((c) => (
-                <li
-                  key={c.cat}
-                  className="flex items-center justify-between rounded-md border border-border bg-secondary/30 px-3 py-2 text-sm"
-                >
-                  <span className="flex items-center gap-2">
-                    <PuzzlePieceIcon
-                      aria-hidden="true"
-                      className="size-4 text-muted-foreground"
-                    />
-                    {c.cat}
-                  </span>
-                  <span className="text-xs text-muted-foreground tabular-nums">
-                    {c.count} sujets
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </Panel>
-
-          <Panel title="Méthode" action={{ href: "/methode", label: "Lire" }}>
-            <div className="flex items-start gap-3">
-              <AcademicCapIcon
-                aria-hidden="true"
-                className="size-8 shrink-0 rounded-md bg-primary/12 p-1.5 text-primary"
-              />
-              <p className="text-sm text-muted-foreground">
-                Refais chaque série jusqu&apos;à dépasser 80%, puis rédige les
-                exercices sans les notes. Les questions ouvertes ne sont pas notées :
-                compare ta réponse au corrigé.
-              </p>
-            </div>
-          </Panel>
+      {/* E. Contenu secondaire */}
+      <section>
+        <h2 className="mb-3 text-base font-semibold">Le reste du programme</h2>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+          {SECONDARY_LINKS.map(({ href, label, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className="flex items-center gap-2.5 rounded-lg border border-border bg-card p-3 text-sm transition-colors hover:border-primary"
+            >
+              <Icon aria-hidden="true" className="size-5 shrink-0 text-muted-foreground" />
+              <span className="min-w-0 truncate">{label}</span>
+            </Link>
+          ))}
         </div>
-      </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          {EXOS.length} exercices rédigés et {progress.questionsTotal} questions au
+          total dans la banque.
+        </p>
+      </section>
+
+      <section className="rounded-lg border border-border bg-card p-4">
+        <h2 className="mb-3 text-base font-semibold">Tous les thèmes</h2>
+        <ul className="space-y-2">
+          {progress.themes.map((theme) => (
+            <li key={theme.key}>
+              <Link
+                href={`/quiz/${theme.key}`}
+                className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-md p-2 transition-colors hover:bg-accent"
+              >
+                <span className="min-w-0 flex-1 truncate text-sm">{theme.title}</span>
+                <StatusBadge state={theme.state} score={theme.pct} />
+                <ArrowRightIcon
+                  aria-hidden="true"
+                  className="size-4 shrink-0 text-muted-foreground"
+                />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <p className="flex items-start gap-2 text-xs text-muted-foreground">
+        <AcademicCapIcon aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+        Objectif : dépasser {MASTERY_TARGET} % sur chaque thème, puis rédiger les
+        exercices sans les notes.
+      </p>
     </div>
   );
 }

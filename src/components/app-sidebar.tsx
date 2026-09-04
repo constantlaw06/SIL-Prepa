@@ -5,6 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { BANK } from "@/data/bank";
+import { useResults } from "@/hooks/use-results";
+import { globalProgress } from "@/lib/mastery";
 import { NAV, isActive } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
@@ -12,10 +15,13 @@ function NavGroup({
   item,
   pathname,
   onNavigate,
+  counter,
 }: {
   item: (typeof NAV)[number];
   pathname: string;
   onNavigate: () => void;
+  /** Indicateur contextuel, ex. « 3/13 » ou « 8 ». */
+  counter?: string;
 }) {
   const active = isActive(pathname, item.href);
   const Icon = item.icon;
@@ -38,7 +44,12 @@ function NavGroup({
           className={cn(row, "flex-1")}
         >
           <Icon aria-hidden="true" className="size-4.5 shrink-0" />
-          <span className="truncate">{item.label}</span>
+          <span className="flex-1 truncate">{item.label}</span>
+          {counter && (
+            <span className="shrink-0 rounded-full bg-secondary px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-muted-foreground">
+              {counter}
+            </span>
+          )}
         </Link>
 
         {item.children && (
@@ -93,6 +104,14 @@ export function AppSidebar({
   onClose: () => void;
 }) {
   const pathname = usePathname();
+  const { results } = useResults();
+  const progress = globalProgress(BANK, results);
+
+  // Indicateurs contextuels : uniquement quand ils apportent une information.
+  const counters: Record<string, string | undefined> = {
+    themes: `${progress.started}/${progress.total}`,
+    errors: progress.totalWrong > 0 ? String(progress.totalWrong) : undefined,
+  };
 
   return (
     <>
@@ -135,6 +154,7 @@ export function AppSidebar({
                 item={item}
                 pathname={pathname}
                 onNavigate={onClose}
+                counter={item.counter ? counters[item.counter] : undefined}
               />
             ))}
           </ul>

@@ -60,6 +60,8 @@ function Option({
 export type QuestionCardProps = {
   question: Question;
   index: number;
+  /** Nombre total de questions, pour situer la progression. */
+  total?: number;
   answer: Answer;
   checked: boolean;
   onAnswer: (value: Answer) => void;
@@ -68,6 +70,7 @@ export type QuestionCardProps = {
 export function QuestionCard({
   question,
   index,
+  total,
   answer,
   checked,
   onAnswer,
@@ -78,8 +81,10 @@ export function QuestionCard({
   return (
     <Card className="gap-0 p-4">
       <div className="mb-2 flex items-start gap-2">
-        <Badge variant="secondary" className="mt-0.5">
-          Q{index + 1}
+        <Badge variant="secondary" className="mt-0.5 shrink-0">
+          <span className="sr-only">Question </span>
+          {index + 1}
+          {total ? <span className="opacity-60">/{total}</span> : null}
         </Badge>
         <div>
           <div className="text-[11px] tracking-wide text-muted-foreground uppercase">

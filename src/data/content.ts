@@ -12,7 +12,7 @@ export const FICHES_HTML = `<div class="card">
     </div>
     <div class="card">
       <h3>Réseaux - sous-réseautage (classe C)</h3>
-      <p>Réseau <code>192.168.28.0</code> → <b>classe C</b> (privée). Découper en 3 → emprunter <b>2 bits</b> (2²=4 ≥ 3).</p>
+      <p><code>192.168.28.0</code> appartient à la plage <b>privée</b> 192.168.0.0/16 (RFC 1918) : c'est une question d'usage, pas de classe. Dans le <b>modèle classful historique</b>, son 1er octet (192, compris entre 192 et 223) la range en <b>classe C</b>, masque par défaut <code>/24</code> - c'est la convention attendue à l'examen. En <b>CIDR</b> (pratique actuelle), la classe ne joue plus : seul le masque explicite compte. Découper en 3 sous-réseaux revient à emprunter <b>2 bits</b> (2² = 4 ≥ 3).</p>
       <ul>
         <li>Masque : <code>255.255.255.192</code> (/26)</li>
         <li>Sous-réseaux : 4 · Hôtes/sous-réseau : 2⁶−2 = <b>62</b></li>

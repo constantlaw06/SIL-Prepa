@@ -7,6 +7,11 @@ export type QuizResult = {
   gradable: number;
   pct: number;
   at: string;
+  /**
+   * Index des questions ratées dans le thème, alimentant le carnet d erreurs.
+   * Absent sur les séries enregistrees avant l ajout du carnet.
+   */
+  wrong?: number[];
 };
 
 export type ResultsState = {

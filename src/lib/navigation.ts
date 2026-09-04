@@ -1,6 +1,7 @@
 import {
   BoltIcon,
   CalendarDaysIcon,
+  ExclamationTriangleIcon,
   LightBulbIcon,
   LinkIcon,
   PencilSquareIcon,
@@ -17,6 +18,8 @@ export type NavItem = {
   icon: IconComponent;
   /** Sous-entrées dépliables dans la barre latérale. */
   children?: { href: string; label: string }[];
+  /** Clé de compteur contextuel affiché à droite du libellé. */
+  counter?: "themes" | "errors";
 };
 
 export const THEME_LINKS = Object.entries(BANK).map(([key, theme]) => ({
@@ -26,12 +29,19 @@ export const THEME_LINKS = Object.entries(BANK).map(([key, theme]) => ({
 
 export const NAV: NavItem[] = [
   { href: "/", label: "Tableau de bord", icon: Squares2X2Icon },
-  { href: "/plan", label: "Plan J-24", icon: CalendarDaysIcon },
+  { href: "/plan", label: "Plan de révision", icon: CalendarDaysIcon },
   {
     href: "/quiz",
     label: "Quiz",
     icon: PencilSquareIcon,
     children: THEME_LINKS,
+    counter: "themes",
+  },
+  {
+    href: "/erreurs",
+    label: "Mes erreurs",
+    icon: ExclamationTriangleIcon,
+    counter: "errors",
   },
   { href: "/exercices", label: "Exercices", icon: PuzzlePieceIcon },
   { href: "/fiches", label: "Fiches", icon: BoltIcon },
@@ -44,10 +54,15 @@ export function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
+const EXTRA_TITLES: Record<string, string> = {
+  "/connexion": "Créer un compte",
+};
+
 /** Titre affiché dans la barre supérieure pour la route courante. */
 export function pageTitle(pathname: string) {
   const themeLink = THEME_LINKS.find((t) => t.href === pathname);
   if (themeLink) return themeLink.label;
+  if (EXTRA_TITLES[pathname]) return EXTRA_TITLES[pathname];
   const item = [...NAV].reverse().find((n) => isActive(pathname, n.href));
   return item?.label ?? "Prépa SIL";
 }
