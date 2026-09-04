@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { BANK } from "@/data/bank";
 import { useResults } from "@/hooks/use-results";
 import { TYPE_LABEL } from "@/lib/quiz";
+import { allSets, setHref } from "@/lib/quiz-sets";
 import type { Question } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -35,11 +36,11 @@ function expectedAnswer(question: Question): string {
 function ErrorItem({
   question,
   index,
-  themeKey,
+  href,
 }: {
   question: Question;
   index: number;
-  themeKey: string;
+  href: string;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -91,9 +92,9 @@ function ErrorItem({
           />
           <div className="mt-3 flex flex-wrap gap-2">
             <Button asChild size="sm" variant="outline">
-              <Link href={`/quiz/${themeKey}`}>
+              <Link href={href}>
                 <ArrowPathIcon aria-hidden="true" />
-                Refaire ce thème
+                Refaire cette série
               </Link>
             </Button>
             <Button asChild size="sm" variant="ghost">
@@ -117,11 +118,17 @@ function ErrorItem({
 export function ErrorBook() {
   const { results } = useResults();
 
-  const groups = Object.entries(BANK)
-    .map(([key, theme]) => {
-      const last = results.last[key];
-      const wrong = (last?.wrong ?? []).filter((i) => i < theme.qs.length);
-      return { key, title: theme.title, questions: theme.qs, wrong };
+  const groups = allSets(BANK)
+    .map((set) => {
+      const last = results.last[set.id];
+      const wrong = (last?.wrong ?? []).filter((i) => i < set.qs.length);
+      return {
+        key: set.id,
+        href: setHref(set),
+        title: set.title,
+        questions: set.qs,
+        wrong,
+      };
     })
     .filter((g) => g.wrong.length > 0)
     .sort((a, b) => b.wrong.length - a.wrong.length);
@@ -174,7 +181,7 @@ export function ErrorBook() {
                 key={index}
                 question={group.questions[index]}
                 index={index}
-                themeKey={group.key}
+                href={group.href}
               />
             ))}
           </ul>

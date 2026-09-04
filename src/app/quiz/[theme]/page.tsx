@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 
 import { QuizRunner } from "@/components/quiz-runner";
+import { SetPicker } from "@/components/quiz/set-picker";
 import { BANK } from "@/data/bank";
+import { themeSets } from "@/lib/quiz-sets";
 
 export function generateStaticParams() {
   return Object.keys(BANK).map((theme) => ({ theme }));
@@ -22,5 +24,12 @@ export default async function QuizThemePage({
   const data = BANK[theme];
   if (!data) notFound();
 
-  return <QuizRunner key={theme} themeKey={theme} theme={data} />;
+  const sets = themeSets(theme, data);
+
+  // Un seul questionnaire : on lance directement le quiz, comme avant.
+  if (sets.length === 1) {
+    return <QuizRunner key={theme} set={sets[0]} />;
+  }
+
+  return <SetPicker sets={sets} themeTitle={data.title} />;
 }

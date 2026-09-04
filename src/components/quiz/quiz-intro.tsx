@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { MASTERY_TARGET } from "@/lib/mastery";
-import type { ThemeProgress } from "@/lib/mastery";
+import type { SetProgress } from "@/lib/mastery";
 import { TYPE_LABEL } from "@/lib/quiz";
 import type { Question } from "@/lib/types";
 
@@ -33,7 +33,7 @@ export function QuizIntro({
   questions,
   onStart,
 }: {
-  progress: ThemeProgress;
+  progress: SetProgress;
   questions: Question[];
   onStart: () => void;
 }) {

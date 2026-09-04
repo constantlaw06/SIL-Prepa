@@ -13,6 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { MASTERY_TARGET } from "@/lib/mastery";
 import type { Recommendation } from "@/lib/mastery";
+import { setHref } from "@/lib/quiz-sets";
 
 /**
  * Bloc dominant du tableau de bord : une seule action, avec la raison de ce
@@ -46,7 +47,7 @@ export function PriorityCard({
     );
   }
 
-  const { theme, reason } = recommendation;
+  const { set, reason } = recommendation;
 
   return (
     <section className="rounded-lg border-2 border-primary/50 bg-primary/5 p-5">
@@ -54,37 +55,37 @@ export function PriorityCard({
         Ta priorité aujourd&apos;hui
       </p>
 
-      <h2 className="mt-2 text-xl font-bold sm:text-2xl">{theme.title}</h2>
+      <h2 className="mt-2 text-xl font-bold sm:text-2xl">{set.title}</h2>
       <p className="mt-1.5 text-sm text-muted-foreground">{reason}</p>
 
       <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-        <StatusBadge state={theme.state} score={theme.pct} />
+        <StatusBadge state={set.state} score={set.pct} />
         <span className="flex items-center gap-1.5 text-muted-foreground">
           <ListBulletIcon aria-hidden="true" className="size-4" />
-          {theme.questionCount} questions
+          {set.questionCount} questions
         </span>
         <span className="flex items-center gap-1.5 text-muted-foreground">
           <ClockIcon aria-hidden="true" className="size-4" />
-          environ {theme.minutes} min
+          environ {set.minutes} min
         </span>
       </div>
 
-      {theme.pct !== null && (
+      {set.pct !== null && (
         <div className="mt-4">
           <div className="mb-1.5 flex items-center justify-between text-xs text-muted-foreground">
             <span>Score actuel</span>
             <span className="tabular-nums">
-              {theme.pct} % · objectif {MASTERY_TARGET} %
+              {set.pct} % · objectif {MASTERY_TARGET} %
             </span>
           </div>
-          <Progress value={theme.pct} />
+          <Progress value={set.pct} />
         </div>
       )}
 
       <Button asChild size="lg" className="mt-5 w-full sm:w-auto">
-        <Link href={`/quiz/${theme.key}`}>
+        <Link href={setHref(set)}>
           <PlayIcon aria-hidden="true" />
-          {theme.result ? "Reprendre ce thème" : "Commencer"}
+          {set.result ? "Reprendre" : "Commencer"}
         </Link>
       </Button>
     </section>

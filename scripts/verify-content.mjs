@@ -58,6 +58,31 @@ function compare(label, expected, actual) {
   return false;
 }
 
+/**
+ * Comme diffLists, mais tolère des entrées ajoutées après celles de la
+ * source (contenu original écrit depuis, ex. de nouvelles questions) : seul
+ * un manque ou une modification d'une entrée d'origine est un échec.
+ */
+function diffPrefix(label, expected, actual, key) {
+  if (actual.length < expected.length) {
+    fail(
+      `${label} : ${actual.length} entrées dans l'application, moins que les ${expected.length} de la source`,
+    );
+  }
+  for (let i = 0; i < expected.length; i++) {
+    const e = expected[i];
+    const a = actual[i];
+    if (!a) {
+      fail(`${label} #${i + 1} manquant : ${key(e)}`);
+      continue;
+    }
+    if (JSON.stringify(e) !== JSON.stringify(a)) {
+      fail(`${label} #${i + 1} modifié : ${key(e)}`);
+    }
+  }
+  return actual.length - expected.length;
+}
+
 function diffLists(label, expected, actual, key) {
   if (expected.length !== actual.length) {
     fail(
@@ -157,10 +182,11 @@ for (const key of appThemes) {
   if (!srcThemes.includes(key)) fail(`Thème « ${key} » absent de la source`);
 }
 
+let addedQuestions = 0;
 for (const key of srcThemes.filter((k) => appThemes.includes(k))) {
   if (srcBank[key].title !== BANK[key].title)
     fail(`Thème « ${key} » : titre différent de la source`);
-  diffLists(
+  addedQuestions += diffPrefix(
     `Thème ${key}`,
     srcBank[key].qs,
     BANK[key].qs,
@@ -188,7 +214,10 @@ const totals = Object.values(BANK).reduce(
 );
 
 console.log(`Themes            : ${appThemes.length} (source : ${srcThemes.length})`);
-console.log(`Questions         : ${totals.questions}`);
+console.log(
+  `Questions         : ${totals.questions}` +
+    (addedQuestions > 0 ? ` (dont ${addedQuestions} ajoutées depuis la source)` : ""),
+);
 for (const [type, n] of Object.entries(totals.byType)) {
   console.log(`  - ${type.padEnd(6)}      : ${n}`);
 }

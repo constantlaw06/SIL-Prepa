@@ -1,9 +1,11 @@
+import { allSets, themeSets } from "@/lib/quiz-sets";
+import type { QuizSet } from "@/lib/quiz-sets";
 import type { QuizResult, ResultsState } from "@/lib/results-store";
 import type { Bank } from "@/lib/types";
 
 /** Seuil de maîtrise commun à toute l'application. */
 export const MASTERY_TARGET = 80;
-/** En dessous, le thème est considéré comme fragile. */
+/** En dessous, la ressource est considérée comme fragile. */
 export const WEAK_THRESHOLD = 50;
 
 /**
@@ -37,17 +39,29 @@ export const STATE_CLASSES: Record<ResourceState, string> = {
   mastered: "border-success/40 bg-success/10 text-success",
 };
 
-/** Un thème sans résultat est « non commencé », jamais « à reprendre ». */
-export function stateOf(result: QuizResult | null | undefined): ResourceState {
-  if (!result) return "new";
-  if (result.pct >= MASTERY_TARGET) return "mastered";
-  if (result.pct < WEAK_THRESHOLD) return "review";
+function stateFromPct(pct: number | null): ResourceState {
+  if (pct === null) return "new";
+  if (pct >= MASTERY_TARGET) return "mastered";
+  if (pct < WEAK_THRESHOLD) return "review";
   return "in-progress";
 }
 
-export type ThemeProgress = {
+/** Un questionnaire sans résultat est « non commencé », jamais « à reprendre ». */
+export function stateOf(result: QuizResult | null | undefined): ResourceState {
+  return stateFromPct(result ? result.pct : null);
+}
+
+export function estimateMinutes(questionCount: number) {
+  return Math.max(1, Math.round((questionCount * 45) / 60));
+}
+
+export type SetProgress = {
+  /** Identifiant du questionnaire : sert de clé de résultat et de route. */
   key: string;
+  themeKey: string;
   title: string;
+  setNumber: number;
+  setCount: number;
   questionCount: number;
   /** Questions notées automatiquement (hors questions ouvertes). */
   gradableCount: number;
@@ -58,30 +72,77 @@ export type ThemeProgress = {
   gap: number;
   attempts: number;
   wrongCount: number;
-  /** Estimation de durée : 45 s par question notée, arrondie à la minute. */
   minutes: number;
 };
 
-export function estimateMinutes(questionCount: number) {
-  return Math.max(1, Math.round((questionCount * 45) / 60));
+/** Progression par questionnaire (granularité de la prise de quiz). */
+export function setProgress(bank: Bank, results: ResultsState): SetProgress[] {
+  return allSets(bank).map((set) => setProgressOf(set, results));
 }
 
+export function setProgressOf(set: QuizSet, results: ResultsState): SetProgress {
+  const result = results.last[set.id] ?? null;
+  const gradableCount = set.qs.filter((q) => q.type !== "short").length;
+  const attempts = results.history.filter((h) => h.theme === set.id).length;
+  return {
+    key: set.id,
+    themeKey: set.themeKey,
+    title: set.title,
+    setNumber: set.setNumber,
+    setCount: set.setCount,
+    questionCount: set.qs.length,
+    gradableCount,
+    result,
+    state: stateOf(result),
+    pct: result ? result.pct : null,
+    gap: result ? Math.max(0, MASTERY_TARGET - result.pct) : MASTERY_TARGET,
+    attempts,
+    wrongCount: result?.wrong?.length ?? 0,
+    minutes: estimateMinutes(set.qs.length),
+  };
+}
+
+export type ThemeProgress = {
+  key: string;
+  title: string;
+  questionCount: number;
+  setCount: number;
+  sets: SetProgress[];
+  /** Questionnaires déjà tentés au moins une fois. */
+  attemptedSets: number;
+  state: ResourceState;
+  /** Moyenne des scores des questionnaires tentés, ou null si aucun. */
+  pct: number | null;
+  gap: number;
+  wrongCount: number;
+  minutes: number;
+};
+
+/**
+ * Vue par thème : agrège ses questionnaires. Utilisée partout où l'unité
+ * pertinente est le thème (tableau de bord, barre latérale, plan), tandis que
+ * la prise de quiz et le carnet d'erreurs travaillent au niveau du
+ * questionnaire via `setProgress`.
+ */
 export function themeProgress(bank: Bank, results: ResultsState): ThemeProgress[] {
   return Object.entries(bank).map(([key, theme]) => {
-    const result = results.last[key] ?? null;
-    const gradableCount = theme.qs.filter((q) => q.type !== "short").length;
-    const attempts = results.history.filter((h) => h.theme === key).length;
+    const sets = themeSets(key, theme).map((s) => setProgressOf(s, results));
+    const attempted = sets.filter((s) => s.result);
+    const pct = attempted.length
+      ? Math.round(attempted.reduce((n, s) => n + (s.pct ?? 0), 0) / attempted.length)
+      : null;
+
     return {
       key,
       title: theme.title,
       questionCount: theme.qs.length,
-      gradableCount,
-      result,
-      state: stateOf(result),
-      pct: result ? result.pct : null,
-      gap: result ? Math.max(0, MASTERY_TARGET - result.pct) : MASTERY_TARGET,
-      attempts,
-      wrongCount: result?.wrong?.length ?? 0,
+      setCount: sets.length,
+      sets,
+      attemptedSets: attempted.length,
+      state: stateFromPct(pct),
+      pct,
+      gap: pct !== null ? Math.max(0, MASTERY_TARGET - pct) : MASTERY_TARGET,
+      wrongCount: sets.reduce((n, s) => n + s.wrongCount, 0),
       minutes: estimateMinutes(theme.qs.length),
     };
   });
@@ -93,7 +154,7 @@ export type GlobalProgress = {
   started: number;
   mastered: number;
   weak: ThemeProgress[];
-  /** Questions notées appartenant à un thème déjà travaillé. */
+  /** Questions appartenant à un thème dont au moins un questionnaire a été tenté. */
   questionsAnswered: number;
   questionsTotal: number;
   averagePct: number | null;
@@ -102,7 +163,7 @@ export type GlobalProgress = {
 
 export function globalProgress(bank: Bank, results: ResultsState): GlobalProgress {
   const themes = themeProgress(bank, results);
-  const started = themes.filter((t) => t.result);
+  const started = themes.filter((t) => t.attemptedSets > 0);
   const questionsTotal = themes.reduce((n, t) => n + t.questionCount, 0);
 
   return {
@@ -111,7 +172,7 @@ export function globalProgress(bank: Bank, results: ResultsState): GlobalProgres
     started: started.length,
     mastered: themes.filter((t) => t.state === "mastered").length,
     weak: themes
-      .filter((t) => t.result && t.state !== "mastered")
+      .filter((t) => t.pct !== null && t.state !== "mastered")
       .sort((a, b) => (a.pct ?? 0) - (b.pct ?? 0)),
     questionsAnswered: started.reduce((n, t) => n + t.questionCount, 0),
     questionsTotal,
@@ -124,9 +185,18 @@ export function globalProgress(bank: Bank, results: ResultsState): GlobalProgres
 
 export type Recommendation = {
   theme: ThemeProgress;
+  /** Le questionnaire précis à ouvrir : le premier à travailler dans ce thème. */
+  set: SetProgress;
   /** Raison affichée à l'utilisateur : pourquoi ce thème maintenant. */
   reason: string;
 };
+
+function firstActionableSet(theme: ThemeProgress): SetProgress {
+  return (
+    theme.sets.find((s) => s.state !== "mastered") ??
+    theme.sets[0]
+  );
+}
 
 /**
  * Choisit le thème à travailler maintenant, par ordre de priorité :
@@ -143,11 +213,12 @@ export function recommend(
   const { themes } = progress;
 
   const weakest = themes
-    .filter((t) => t.result && t.pct !== null && t.pct < WEAK_THRESHOLD)
+    .filter((t) => t.pct !== null && t.pct < WEAK_THRESHOLD)
     .sort((a, b) => (a.pct ?? 0) - (b.pct ?? 0))[0];
   if (weakest) {
     return {
       theme: weakest,
+      set: firstActionableSet(weakest),
       reason: `Ton score le plus bas (${weakest.pct} %). C'est là que tu gagnes le plus de points.`,
     };
   }
@@ -156,14 +227,16 @@ export function recommend(
   if (planned && planned.state !== "mastered") {
     return {
       theme: planned,
+      set: firstActionableSet(planned),
       reason: "C'est le thème prévu par ton plan de révision aujourd'hui.",
     };
   }
 
-  const untouched = themes.find((t) => !t.result);
+  const untouched = themes.find((t) => t.attemptedSets === 0);
   if (untouched) {
     return {
       theme: untouched,
+      set: firstActionableSet(untouched),
       reason: progress.started
         ? "Thème encore jamais travaillé : il faut d'abord situer ton niveau."
         : "Commence par ce thème pour établir ton niveau de départ.",
@@ -176,6 +249,7 @@ export function recommend(
   if (toImprove) {
     return {
       theme: toImprove,
+      set: firstActionableSet(toImprove),
       reason: `Il te manque ${toImprove.gap} points pour atteindre l'objectif de ${MASTERY_TARGET} %.`,
     };
   }

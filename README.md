@@ -35,9 +35,13 @@ combien de jours le plan démarre.
 - **Plan J-24** (`/plan`) - calendrier de révision en 3 phases, avec décompte
   jusqu'à la date d'examen (modifiable, mémorisée dans le navigateur) et mise en
   évidence de la journée courante.
-- **Quiz** (`/quiz`, `/quiz/[theme]`) - 13 thèmes, 118 questions : QCM à une ou
-  plusieurs réponses, Vrai/Faux et questions ouvertes. Correction avec
-  explications, score sur les questions notables et barre de progression.
+- **Quiz** (`/quiz`, `/quiz/[theme]`, `/quiz/[theme]/[n]`) - 13 thèmes, 128
+  questions : QCM à une ou plusieurs réponses, Vrai/Faux et questions
+  ouvertes. Correction avec explications, score sur les questions notables et
+  barre de progression. Un thème de plus de 15 questions est automatiquement
+  découpé en plusieurs questionnaires équilibrés (voir « Questionnaires »
+  ci-dessous) ; les 12 thèmes restés sous ce seuil ne changent pas de route
+  ni de comportement.
 - **Exercices** (`/exercices`) - 38 sujets type-examen filtrables par catégorie,
   chaque corrigé se dépliant à la demande.
 - **Fiches** (`/fiches`), **Méthode** (`/methode`), **Ressources**
@@ -78,7 +82,7 @@ progression restant alors locale au navigateur.
    et le coller dans `.env.local`.
    ⚠️ `npx auth secret`, documenté par Auth.js, installe en pratique le
    paquet npm `auth` d'un projet tiers (« Better Auth ») et produit une
-   variable `BETTER_AUTH_SECRET` sans rapport — ne pas l'utiliser ici.
+   variable `BETTER_AUTH_SECRET` sans rapport - ne pas l'utiliser ici.
 4. Créer les identifiants OAuth chez le ou les fournisseurs voulus. Un seul
    suffit : la page de connexion n'affiche que ceux qui sont configurés. Le
    menu **API et services → Identifiants** de Google s'appelle maintenant
@@ -91,7 +95,7 @@ progression restant alors locale au navigateur.
      de redirection : `http://localhost:3000/api/auth/callback/facebook`.
      Facebook impose HTTPS hors `localhost`.
 5. `npm run db:push` pour créer les tables sur la base Postgres.
-   ⚠️ La CLI Prisma ne lit **que** `.env` par défaut, jamais `.env.local` — le
+   ⚠️ La CLI Prisma ne lit **que** `.env` par défaut, jamais `.env.local` - le
    script passe donc par `dotenv-cli` (`db:push` et `db:studio` dans
    `package.json`) pour forcer la lecture de `.env.local`. Appeler `prisma`
    directement (`npx prisma db push`) sans ce détour échoue avec
@@ -144,7 +148,7 @@ Deux façons équivalentes d'obtenir un `DATABASE_URL` :
   copier la chaîne de connexion (`postgresql://...`).
 
 Si la base est créée depuis le tableau de bord Vercel, `DATABASE_URL`
-n'existe qu'**en tant que variable d'environnement Vercel** — pas dans le
+n'existe qu'**en tant que variable d'environnement Vercel** - pas dans le
 projet en local. Pour créer les tables (étape suivante), copier cette valeur
 depuis **Settings → Environment Variables** vers `.env.local`.
 
@@ -155,7 +159,7 @@ depuis **Settings → Environment Variables** vers `.env.local`.
 npm run db:push
 ```
 
-C'est la base pointée par ce `DATABASE_URL` qui doit contenir les tables —
+C'est la base pointée par ce `DATABASE_URL` qui doit contenir les tables -
 celle que Vercel utilisera en production. Pousser le schéma vers une autre
 base (ex. une base locale ou une base Neon créée « à côté ») laisse la base
 de production sans tables : Auth.js échoue alors à l'étape de callback OAuth
@@ -204,7 +208,7 @@ que le site fonctionne avant de brancher le domaine personnalisé.
    |---|---|---|
    | CNAME | `prepa-sil` | `cname.vercel-dns.com.` |
 
-   (la valeur exacte est donnée par Vercel — la copier telle quelle, point
+   (la valeur exacte est donnée par Vercel - la copier telle quelle, point
    final inclus.)
 3. Ajouter cet enregistrement chez le fournisseur DNS qui gère
    `constantdansou.me`. Propagation : quelques minutes en général, jusqu'à
@@ -272,16 +276,42 @@ Les champs `q`, `e`, `enonce`, `corrige` et les fiches acceptent du HTML (mise e
 forme, `<code>`, tableaux). Il est rendu tel quel par `RichText` : n'y placer que
 du contenu écrit dans le dépôt, jamais de saisie utilisateur.
 
+## Questionnaires
+
+Un thème n'est jamais présenté comme une liste de plus de 15 questions :
+`src/lib/quiz-sets.ts` découpe automatiquement `BANK[clé].qs` en plusieurs
+questionnaires de taille équilibrée dès que le thème en compte davantage (18
+questions → deux séries de 9, plutôt qu'une de 15 et une de 3 restante).
+Aucune restructuration des données n'est nécessaire : ajouter des questions à
+un thème dans `bank.ts` suffit, le découpage suit automatiquement.
+
+- 1 seul questionnaire → `/quiz/<thème>` lance directement le quiz, comme
+  avant (aucun changement de route ni de comportement pour les thèmes restés
+  sous 15 questions).
+- Plusieurs questionnaires → `/quiz/<thème>` affiche un sélecteur de série,
+  chacune menant à `/quiz/<thème>/<n>`.
+
+Chaque questionnaire a sa propre progression, indépendante des autres séries
+du même thème : la clé de résultat est `<thème>` (série unique) ou
+`<thème>-<n>` (ex. `web-2`), gérée par `setHref()` et `setProgressOf()` dans
+`src/lib/mastery.ts`. Le tableau de bord et la barre latérale continuent de
+raisonner par thème (moyenne des séries tentées) ; la prise de quiz, le
+carnet d'erreurs et la recommandation du jour raisonnent au niveau du
+questionnaire précis.
+
 ## Contrôle des contenus
 
 `npm run verify:content` compare `src/data` au document d'origine
 `Prepa_Examen_SIL.html` : présence et ordre de chaque thème, question, option,
 bonne réponse, explication, exercice et corrigé, en rejouant les seules
 transformations voulues (tirets simples, icône d'horloge sortie des données).
-Le script vérifie ensuite la cohérence interne : pas d'énoncé ni d'explication
-vide, index de bonne réponse valide, réponse modèle présente pour chaque
-question ouverte. Il sort en erreur au moindre écart, ce qui en fait un garde-fou
-utile après toute modification des contenus.
+Pour les questions d'un thème, la comparaison tolère des ajouts en fin de
+liste (contenu original écrit depuis la migration) : seuls un manque ou une
+modification d'une question d'origine font échouer le contrôle. Le script
+vérifie ensuite la cohérence interne : pas d'énoncé ni d'explication vide,
+index de bonne réponse valide, réponse modèle présente pour chaque question
+ouverte. Il sort en erreur au moindre écart, ce qui en fait un garde-fou utile
+après toute modification des contenus.
 
 ## Icônes
 
