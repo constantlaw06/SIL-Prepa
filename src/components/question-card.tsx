@@ -57,6 +57,56 @@ function Option({
   );
 }
 
+/**
+ * Une question ouverte n'a pas de correction automatique fiable (texte
+ * libre) : l'étudiant doit se corriger lui-même contre la réponse modèle.
+ * Tant qu'il ne l'a pas fait, aucune couleur de succès ne doit apparaître -
+ * sinon l'interface laisse croire à une bonne réponse par défaut.
+ */
+function SelfAssessment({
+  selfAssessed,
+  onSelfAssess,
+}: {
+  selfAssessed: boolean | null;
+  onSelfAssess: (correct: boolean) => void;
+}) {
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3">
+      <span className="text-xs font-medium text-muted-foreground">
+        As-tu répondu correctement ?
+      </span>
+      <button
+        type="button"
+        onClick={() => onSelfAssess(true)}
+        aria-pressed={selfAssessed === true}
+        className={cn(
+          "flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors",
+          selfAssessed === true
+            ? "border-success bg-success/10 text-success"
+            : "border-border text-muted-foreground hover:border-success/50 hover:text-success",
+        )}
+      >
+        <CheckCircleIcon aria-hidden="true" className="size-3.5" />
+        Oui, c&apos;était juste
+      </button>
+      <button
+        type="button"
+        onClick={() => onSelfAssess(false)}
+        aria-pressed={selfAssessed === false}
+        className={cn(
+          "flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors",
+          selfAssessed === false
+            ? "border-destructive bg-destructive/10 text-destructive"
+            : "border-border text-muted-foreground hover:border-destructive/50 hover:text-destructive",
+        )}
+      >
+        <XCircleIcon aria-hidden="true" className="size-3.5" />
+        Non, à revoir
+      </button>
+    </div>
+  );
+}
+
 export type QuestionCardProps = {
   question: Question;
   index: number;
@@ -65,6 +115,12 @@ export type QuestionCardProps = {
   answer: Answer;
   checked: boolean;
   onAnswer: (value: Answer) => void;
+  /**
+   * Auto-évaluation d'une question ouverte : null tant que l'étudiant ne
+   * s'est pas prononcé. Ignoré pour les autres types de question.
+   */
+  selfAssessed?: boolean | null;
+  onSelfAssess?: (correct: boolean) => void;
 };
 
 export function QuestionCard({
@@ -74,6 +130,8 @@ export function QuestionCard({
   answer,
   checked,
   onAnswer,
+  selfAssessed = null,
+  onSelfAssess,
 }: QuestionCardProps) {
   const name = `q${index}`;
   const ok = isCorrect(question, answer);
@@ -174,7 +232,11 @@ export function QuestionCard({
           className={cn(
             "mt-3",
             question.type === "short"
-              ? "border-border bg-muted/40"
+              ? selfAssessed === true
+                ? "border-success/40 bg-success/10"
+                : selfAssessed === false
+                  ? "border-destructive/40 bg-destructive/10"
+                  : "border-border bg-muted/40"
               : ok
                 ? "border-success/40 bg-success/10"
                 : "border-destructive/40 bg-destructive/10",
@@ -183,13 +245,19 @@ export function QuestionCard({
           <AlertDescription>
             {question.type === "short" ? (
               <div className="rich text-sm">
-                <b className="text-success">Réponse modèle : </b>
+                <b className="text-foreground">Réponse modèle : </b>
                 {question.a}
                 <RichText
                   as="div"
                   html={question.e}
                   className="mt-1 text-muted-foreground"
                 />
+                {onSelfAssess && (
+                  <SelfAssessment
+                    selfAssessed={selfAssessed}
+                    onSelfAssess={onSelfAssess}
+                  />
+                )}
               </div>
             ) : (
               <div className="rich flex gap-2 text-sm">

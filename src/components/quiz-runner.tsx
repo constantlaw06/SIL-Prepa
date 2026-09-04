@@ -22,6 +22,14 @@ export function QuizRunner({ set }: { set: QuizSet }) {
   const { results } = useResults();
   const [phase, setPhase] = useState<Phase>("intro");
   const [answers, setAnswers] = useState<Record<number, Answer>>({});
+  /*
+   * Les questions ouvertes ne peuvent pas être corrigées automatiquement :
+   * l'étudiant se juge lui-même contre la réponse modèle. `null` = pas encore
+   * jugée, pour ne jamais afficher une réponse ouverte comme correcte par
+   * défaut.
+   */
+  const [openAssessed, setOpenAssessed] = useState<Record<number, boolean>>({});
+  const correctedAtRef = useRef<string | null>(null);
   const questionsRef = useRef<HTMLDivElement>(null);
 
   const progress = useMemo(() => setProgressOf(set, results), [set, results]);
@@ -34,26 +42,49 @@ export function QuizRunner({ set }: { set: QuizSet }) {
     (q, i) => q.type !== "short" && answers[i] !== undefined,
   ).length;
 
-  const wrong = set.qs
+  const autoWrong = set.qs
     .map((q, i) => ({ q, i }))
     .filter(({ q, i }) => q.type !== "short" && !isCorrect(q, answers[i]))
     .map(({ i }) => i);
 
+  // Le carnet d'erreurs et le résumé du résultat reprennent aussi les
+  // questions ouvertes que l'étudiant s'est lui-même jugées ratées.
+  const openWrong = (indices: Record<number, boolean>) =>
+    Object.entries(indices)
+      .filter(([, correct]) => !correct)
+      .map(([i]) => Number(i));
+
+  const wrong = [...autoWrong, ...openWrong(openAssessed)].sort((a, b) => a - b);
+
   const correct = () => {
     setPhase("done");
-    recordResult({
-      theme: set.id,
-      score,
-      gradable,
-      pct,
-      at: new Date().toISOString(),
-      wrong,
-    });
+    const at = new Date().toISOString();
+    correctedAtRef.current = at;
+    recordResult({ theme: set.id, score, gradable, pct, at, wrong: autoWrong });
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const selfAssess = (index: number, isCorrectAnswer: boolean) => {
+    const next = { ...openAssessed, [index]: isCorrectAnswer };
+    setOpenAssessed(next);
+    // Met à jour la série déjà enregistrée : même score QCM/VF, mais le
+    // carnet d'erreurs reflète désormais aussi cette question ouverte.
+    if (correctedAtRef.current) {
+      recordResult({
+        theme: set.id,
+        score,
+        gradable,
+        pct,
+        at: correctedAtRef.current,
+        wrong: [...autoWrong, ...openWrong(next)].sort((a, b) => a - b),
+      });
+    }
   };
 
   const restart = () => {
     setAnswers({});
+    setOpenAssessed({});
+    correctedAtRef.current = null;
     setPhase("running");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -112,6 +143,8 @@ export function QuizRunner({ set }: { set: QuizSet }) {
             answer={answers[i]}
             checked={checked}
             onAnswer={(value) => setAnswers((prev) => ({ ...prev, [i]: value }))}
+            selfAssessed={i in openAssessed ? openAssessed[i] : null}
+            onSelfAssess={(isCorrectAnswer) => selfAssess(i, isCorrectAnswer)}
           />
         ))}
       </div>

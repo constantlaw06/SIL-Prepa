@@ -41,7 +41,13 @@ combien de jours le plan démarre.
   barre de progression. Un thème de plus de 15 questions est automatiquement
   découpé en plusieurs questionnaires équilibrés (voir « Questionnaires »
   ci-dessous) ; les 12 thèmes restés sous ce seuil ne changent pas de route
-  ni de comportement.
+  ni de comportement. Une question ouverte ne peut pas être corrigée
+  automatiquement (texte libre) : après « Corriger », l'étudiant se juge
+  lui-même contre la réponse modèle (« As-tu répondu correctement ? »).
+  Avant ce geste, aucune couleur de succès n'apparaît - la réponse modèle est
+  affichée neutre, jamais en vert par défaut, pour ne pas laisser croire à
+  une bonne réponse. Un « Non » alimente le carnet d'erreurs comme une
+  question notée ratée.
 - **Exercices** (`/exercices`) - 38 sujets type-examen filtrables par catégorie,
   chaque corrigé se dépliant à la demande.
 - **Fiches** (`/fiches`), **Méthode** (`/methode`), **Ressources**
