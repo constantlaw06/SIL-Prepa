@@ -61,6 +61,23 @@ en tiroir sous 1024 px), barre supérieure avec titre de page, recherche globale
 contenu. Thème sombre par défaut, tokens de couleur définis dans
 `src/app/globals.css` pour les deux modes.
 
+### Logo et icônes
+
+Les deux logos fournis (`public/LOGO SIL  PREPA1.svg` fond blanc, `public/LOGO
+SIL PREPA2.svg` fond bleu) sont la source unique de toute l'iconographie de
+marque. Des copies sans espace dans le nom (`logo-sil-prepa-light.svg` /
+`-dark.svg`) servent aux références dans le code - la variante fond bleu est
+utilisée dans la barre latérale (fond sombre), la variante fond blanc pour les
+icônes de navigateur.
+
+Favicon, icône PWA et icône iOS sont générées par rasterisation
+(`sharp`) du logo fond blanc vers les conventions de fichiers de Next.js App
+Router : `src/app/icon.svg`, `icon.png`, `apple-icon.png`, `favicon.ico` (ICO
+moderne à image PNG embarquée) et `public/icon-192.png` / `icon-512.png` pour
+`src/app/manifest.ts` (installation « Ajouter à l'écran d'accueil »). Pour
+régénérer ces fichiers après un changement de logo, réutiliser le même script
+de rasterisation (taille et conventions de nommage à respecter).
+
 ## Progression
 
 Chaque clic sur « Corriger » enregistre le score de la série dans le

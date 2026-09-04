@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -131,9 +132,13 @@ export function AppSidebar({
         )}
       >
         <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-sidebar-border px-4">
-          <span
-            aria-hidden="true"
-            className="size-6 shrink-0 rounded-full bg-primary/20 ring-2 ring-primary/60"
+          <Image
+            src="/logo-sil-prepa-dark.svg"
+            alt=""
+            width={28}
+            height={28}
+            className="size-7 shrink-0 rounded-md"
+            priority
           />
           <span className="flex-1 truncate font-semibold">Prépa SIL</span>
           <button
