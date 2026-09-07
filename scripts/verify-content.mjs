@@ -178,9 +178,10 @@ const appThemes = Object.keys(BANK);
 for (const key of srcThemes) {
   if (!appThemes.includes(key)) fail(`Thème « ${key} » absent de l'application`);
 }
-for (const key of appThemes) {
-  if (!srcThemes.includes(key)) fail(`Thème « ${key} » absent de la source`);
-}
+// Un thème absent de la source est un ajout légitime (ex. import d'une
+// banque de questions externe), tant qu'il ne fait perdre aucun thème
+// d'origine : c'est déjà vérifié ci-dessus.
+const addedThemes = appThemes.filter((key) => !srcThemes.includes(key));
 
 let addedQuestions = 0;
 for (const key of srcThemes.filter((k) => appThemes.includes(k))) {
@@ -213,7 +214,10 @@ const totals = Object.values(BANK).reduce(
   { questions: 0, byType: {} },
 );
 
-console.log(`Themes            : ${appThemes.length} (source : ${srcThemes.length})`);
+console.log(
+  `Themes            : ${appThemes.length} (source : ${srcThemes.length})` +
+    (addedThemes.length > 0 ? ` (dont ${addedThemes.length} ajoutés)` : ""),
+);
 console.log(
   `Questions         : ${totals.questions}` +
     (addedQuestions > 0 ? ` (dont ${addedQuestions} ajoutées depuis la source)` : ""),

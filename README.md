@@ -35,13 +35,13 @@ combien de jours le plan démarre.
 - **Plan J-24** (`/plan`) - calendrier de révision en 3 phases, avec décompte
   jusqu'à la date d'examen (modifiable, mémorisée dans le navigateur) et mise en
   évidence de la journée courante.
-- **Quiz** (`/quiz`, `/quiz/[theme]`, `/quiz/[theme]/[n]`) - 13 thèmes, 128
+- **Quiz** (`/quiz`, `/quiz/[theme]`, `/quiz/[theme]/[n]`) - 18 thèmes, 713
   questions : QCM à une ou plusieurs réponses, Vrai/Faux et questions
   ouvertes. Correction avec explications, score sur les questions notables et
   barre de progression. Un thème de plus de 15 questions est automatiquement
   découpé en plusieurs questionnaires équilibrés (voir « Questionnaires »
-  ci-dessous) ; les 12 thèmes restés sous ce seuil ne changent pas de route
-  ni de comportement. Une question ouverte ne peut pas être corrigée
+  ci-dessous) ; les thèmes restés sous ce seuil ne changent pas de route ni
+  de comportement. Une question ouverte ne peut pas être corrigée
   automatiquement (texte libre) : après « Corriger », l'étudiant se juge
   lui-même contre la réponse modèle (« As-tu répondu correctement ? »).
   Avant ce geste, aucune couleur de succès n'apparaît - la réponse modèle est
@@ -59,7 +59,7 @@ combien de jours le plan démarre.
 
 ## Interface
 
-Coquille de type ERP : barre latérale fixe (dépliable sur les 13 thèmes de quiz,
+Coquille de type ERP : barre latérale fixe (dépliable sur les thèmes de quiz,
 en tiroir sous 1024 px), barre supérieure avec titre de page, recherche globale
 (thèmes, questions, exercices), date d'examen et décompte, puis la zone de
 contenu. Thème sombre par défaut, tokens de couleur définis dans
@@ -306,6 +306,34 @@ src/
 Les champs `q`, `e`, `enonce`, `corrige` et les fiches acceptent du HTML (mise en
 forme, `<code>`, tableaux). Il est rendu tel quel par `RichText` : n'y placer que
 du contenu écrit dans le dépôt, jamais de saisie utilisateur.
+
+## Import de la banque QCM (QCM_Informatique.xlsx)
+
+585 questions QCM (13 domaines × 45, difficulté Facile/Moyen/Difficile,
+réponse unique parmi 4 choix, explication justifiée) ont été importées depuis
+`QCM_Informatique.xlsx`, une banque fournie par l'auteur du projet. Chaque
+domaine du classeur a été mappé sur `src/data/bank.ts` :
+
+| Feuille du classeur | Thème | Traitement |
+|---|---|---|
+| Architecture, Réseaux, Bases de données, SQL, Numération, PHP, UML, Développement web | `archi`, `res`, `bd`, `sql`, `num`, `php`, `uml`, `web` | Questions ajoutées à la suite du thème existant |
+| Algorithmique | `algo` | Nouveau thème |
+| Systèmes exploitation | `sysexp` | Nouveau thème |
+| POO concepts | `poogen` | Nouveau thème |
+| C++ | `cpp` | Nouveau thème |
+| POO Java | `poojava` | Nouveau thème |
+
+Le texte de chaque question, option et explication a été échappé (`<`, `>`,
+`&`) avant insertion : une partie du classeur contient des extraits de code
+(`<?php`, `<main>`, `delete[]`...) qui, non échappés, seraient interprétés
+comme du HTML par `RichText` au lieu de s'afficher tels quels.
+
+Pour un futur réimport (nouvelle version du classeur, autres feuilles), le
+script utilisé n'est pas conservé dans le dépôt (opération ponctuelle) ; sa
+logique - lecture via `xlsx` (SheetJS), échappement HTML, insertion à la fin
+du tableau `qs` du thème existant ou création d'un nouveau bloc `BANK[clé]`
+avant la fin de l'objet - est réutilisable pour toute source similaire
+(colonnes N°/Difficulté/Question/Choix A-D/Bonne réponse/Explication).
 
 ## Questionnaires
 
